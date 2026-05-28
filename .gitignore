@@ -12,3 +12,6 @@
 .DS_Store
 *.log
 .env*.local
+
+# typescript incremental build info
+*.tsbuildinfo
