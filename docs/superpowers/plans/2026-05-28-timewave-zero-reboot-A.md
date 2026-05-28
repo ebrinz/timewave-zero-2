@@ -231,8 +231,13 @@ Expected: build prints "Exporting" and an `out/` directory appears with `index.h
 
 - [ ] **Step 5: Verify subpath preview**
 
-Run: `NODE_ENV=production npm run build && npm run preview`
-Open `http://localhost:3001/timewave-zero-2/` — the default page renders with assets loading (no 404s in console). Ctrl-C.
+Note: `next build` always runs as `NODE_ENV=production`, so EVERY build is prefixed for the subpath (there is no unprefixed build, and that's fine — builds are only for deploy). The local dev server (`next dev`, development) is the unprefixed one. Verify the build output is prefixed:
+```bash
+npm run build
+grep -o '/timewave-zero-2/_next[^"]*' out/index.html | head -3   # expect prefixed asset paths
+npm run preview   # serves out/ ; open http://localhost:3001/timewave-zero-2/
+```
+Open `http://localhost:3001/timewave-zero-2/` — the page renders with assets loading (no 404s). Ctrl-C.
 
 - [ ] **Step 6: Commit**
 
