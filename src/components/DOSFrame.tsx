@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { Hotkeys } from './Hotkeys';
 
 const NAV = [
   { href: '/', label: 'CHART' },
@@ -11,8 +12,10 @@ const NAV = [
 
 export function DOSFrame({ status, children }: { status?: ReactNode; children: ReactNode }) {
   const path = usePathname();
+  const router = useRouter();
   return (
     <div className="flex flex-col h-screen">
+      <Hotkeys onHelp={() => router.push('/help')} onAbout={() => router.push('/about')} onChart={() => router.push('/')} />
       <header className="flex justify-between items-center px-2 h-8 border-b border-[#163] text-sm phosphor-glow">
         <span>TIMEWAVE ZERO 2 · NOVELTY THEORY ENGINE</span>
         <nav className="flex gap-2">
