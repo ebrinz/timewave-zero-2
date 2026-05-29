@@ -1,8 +1,8 @@
 import type { OverlayLayer, HitResult } from './types';
 import { tToX } from '@/chart/viewport';
-import { dateToT } from '@/chart/time';
+import { dateToT, yearToDate } from '@/chart/time';
 
-const yearT = (y: number) => dateToT(new Date(Date.UTC(y, 5, 15)));
+const yearT = (y: number) => dateToT(yearToDate(y));
 
 export const MARKERS = [
   { t: 0, label: 'ZERO POINT · 21 DEC 2012', color: '#ff4444' },

@@ -1,6 +1,6 @@
 import type { OverlayLayer } from './types';
 import { tToX } from '@/chart/viewport';
-import { dateToT, tToDate } from '@/chart/time';
+import { dateToT, tToDate, yearToDate } from '@/chart/time';
 
 const YEAR = 365.25;
 function tickStep(spanYears: number): number {
@@ -21,7 +21,7 @@ export const GridLayer: OverlayLayer = {
     const yL = tToDate(view.tLeft).getUTCFullYear();
     const yR = tToDate(view.tRight).getUTCFullYear();
     for (let yr = Math.ceil(yL/step)*step; yr <= Math.floor(yR/step)*step; yr += step) {
-      const t = dateToT(new Date(Date.UTC(yr, 5, 15)));
+      const t = dateToT(yearToDate(yr));
       const x = tToX(t, view, dims.w);
       if (x < 0 || x > dims.w) continue;
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, dims.h); ctx.stroke();
