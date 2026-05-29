@@ -21,3 +21,6 @@
 /og-chart.png
 /twz-*.png
 /help-page.png
+
+# next generated
+/next-env.d.ts
