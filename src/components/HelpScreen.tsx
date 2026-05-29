@@ -28,7 +28,7 @@ export function HelpScreen() {
           &ldquo;habit&rdquo; or entrenchment at a given moment.{' '}
           <strong>A low value means high novelty; a high value means high habit.</strong> The wave
           descends toward zero as it approaches the zero point on 21 December 2012, where it
-          reaches its minimum — maximum novelty. In other words, <em>novelty increases downward</em>
+          reaches its minimum — maximum novelty. In other words, <em>novelty increases downward</em>{' '}
           on this chart. When you see the wave dip, novelty is increasing; when the wave rises,
           habit is dominant.
         </p>
