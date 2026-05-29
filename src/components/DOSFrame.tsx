@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Hotkeys } from './Hotkeys';
+import { ShareButton } from './ShareButton';
 
 const NAV = [
   { href: '/', label: 'CHART' },
@@ -31,7 +32,8 @@ export function DOSFrame({ status, children }: { status?: ReactNode; children: R
       </header>
       <main className="flex-1 min-h-0 relative">{children}</main>
       <footer className="flex gap-3 items-center px-2 h-6 border-t border-[#163] text-xs text-[var(--tw-dim)]">
-        {status ?? <span>[H] HELP</span>}
+        <span>[H] HELP</span>
+        <span className="ml-auto"><ShareButton /></span>
       </footer>
     </div>
   );
