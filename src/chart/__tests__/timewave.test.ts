@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { novelty, DATA_SET, KING_WEN, WAVE_VARIANT } from '@/chart/timewave';
+import { novelty, interp, DATA_SET, KING_WEN, WAVE_VARIANT } from '@/chart/timewave';
 import { REFERENCE_SAMPLES } from '@/chart/__fixtures__/sheliak-reference';
 
 describe('data set + constants', () => {
@@ -17,10 +17,22 @@ describe('data set + constants', () => {
 describe('novelty(t) fidelity', () => {
   it('is exactly 0 at the zero point', () => { expect(novelty(0)).toBe(0); });
   it('reproduces Meyer reference samples', () => {
+    // Guard against silent fixture truncation: the loop below is only meaningful
+    // if the fixture still carries its full set of published anchors.
+    expect(REFERENCE_SAMPLES.length).toBeGreaterThanOrEqual(10);
     for (const { t, value } of REFERENCE_SAMPLES) {
       // relative tolerance ~1e-6; values span 1e-6 .. ~19
       expect(novelty(t)).toBeCloseTo(value, 6);
     }
+  });
+  it('interp wraps from index 383 to 0 (linear across the data-set seam)', () => {
+    // At y=383.5, interp must blend DATA_SET[383] with the wrapped DATA_SET[0].
+    const last = DATA_SET[383];
+    const first = DATA_SET[0];
+    expect(interp(383)).toBe(last);            // integer y -> exact sample
+    expect(interp(384)).toBe(DATA_SET[0]);     // 384 mod 384 = 0
+    expect(interp(383.5)).toBeCloseTo((first - last) * 0.5 + last, 12);
+    expect(interp(383.25)).toBeCloseTo((first - last) * 0.25 + last, 12);
   });
   it('hits the clean self-similarity anchor f(24576)=3/64', () => {
     expect(novelty(24576)).toBeCloseTo(3/64, 9);

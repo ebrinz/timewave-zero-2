@@ -57,7 +57,7 @@ const powers: number[] = (() => {
  * Matches Meyer's `v` in TW_EN.C. (`fmod(y,384)` truncated to int == floor(y) mod
  * 384 for y >= 0, which is the only domain used since wave_value takes |t|.)
  */
-function interp(y: number): number {
+export function interp(y: number): number {
   const fl = Math.floor(y);
   const i = ((fl % DATA_LEN) + DATA_LEN) % DATA_LEN;
   const z = y - fl;
@@ -76,8 +76,11 @@ function interp(y: number): number {
 export function waveValue(x: number): number {
   let sum = 0;
   if (x !== 0) {
-    // (A) large scales: i = 0,1,2,... while 64^i <= x
-    for (let i = 0; x >= powers[i]; i++) {
+    // (A) large scales: i = 0,1,2,... while 64^i <= x. The `i < powers.length`
+    // bound is belt-and-suspenders (our domain |t| <= ~1.8e7 days only reaches
+    // i=4); it guards against an out-of-range powers[] read for absurd inputs
+    // instead of relying on `x >= undefined` evaluating false.
+    for (let i = 0; i < powers.length && x >= powers[i]; i++) {
       sum += powers[i] * interp(x / powers[i]);
     }
     // (B) fractal small scales: i = 1,2,... until convergence
