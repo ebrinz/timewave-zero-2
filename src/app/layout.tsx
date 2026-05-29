@@ -10,8 +10,14 @@ const vt323 = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.github.io/timewave-zero-2/'),
   title: 'TIMEWAVE ZERO 2',
-  description: 'A DOS-homage reboot of McKenna & Meyer\'s Timewave Zero (Sheliak TW1).',
+  description: 'A DOS-homage reboot of McKenna & Meyer’s Timewave Zero (Sheliak TW1 novelty wave).',
+  openGraph: {
+    title: 'TIMEWAVE ZERO 2',
+    description: 'Explore the Sheliak timewave — McKenna’s novelty theory as an interactive DOS-style chart.',
+    images: ['/og/chart.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

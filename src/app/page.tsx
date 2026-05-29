@@ -1,25 +1,10 @@
-'use client';
-import { Suspense } from 'react';
-import { ChartProvider } from '@/state/ChartProvider';
-import { ChartCanvas } from '@/components/ChartCanvas';
-import { ChartHUD } from '@/components/ChartHUD';
-import { LiveReadout } from '@/components/LiveReadout';
-import { GridLayer } from '@/chart/layers/GridLayer';
-import { WaveLayer } from '@/chart/layers/WaveLayer';
-import { MarkersLayer } from '@/chart/layers/MarkersLayer';
+import { ChartIsland } from '@/components/ChartIsland';
 
-// Module-level constant so the layers array reference is stable across renders
-// (ChartProvider memoizes on it).
-const LAYERS = [GridLayer, WaveLayer, MarkersLayer];
+export const metadata = {
+  title: 'TIMEWAVE ZERO 2',
+  openGraph: { title: 'TIMEWAVE ZERO 2', images: ['/og/chart.png'] },
+};
 
 export default function Page() {
-  return (
-    <Suspense fallback={null}>
-      <ChartProvider layers={LAYERS}>
-        <ChartCanvas />
-        <LiveReadout />
-        <ChartHUD />
-      </ChartProvider>
-    </Suspense>
-  );
+  return <ChartIsland />;
 }
