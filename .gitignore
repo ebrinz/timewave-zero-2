@@ -22,5 +22,10 @@
 /twz-*.png
 /help-page.png
 
+# playwright output
+/test-results
+/playwright-report
+/playwright/.cache
+
 # next generated
 /next-env.d.ts
