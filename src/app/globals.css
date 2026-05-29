@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* --- scaffold theme vars (kept for Tailwind color utilities) --- */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,15 +13,27 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* dark-mode scaffold block removed: phosphor palette below always wins */
+
+/* --- VT323 bitmap terminal font --- */
+@font-face {
+  font-family: 'VT323';
+  src: url('/fonts/VT323.ttf') format('truetype');
+  font-display: swap;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* --- Phosphor-green palette (overrides scaffold body rule) --- */
+:root {
+  --tw-bg: #06090a;
+  --tw-fg: #7fff9e;
+  --tw-dim: rgba(127, 255, 127, 0.45);
+  --tw-accent: #ffb84a;
 }
+
+html, body {
+  background: var(--tw-bg);
+  color: var(--tw-fg);
+  font-family: 'VT323', ui-monospace, monospace;
+}
+
+.phosphor-glow { text-shadow: 0 0 6px currentColor; }
