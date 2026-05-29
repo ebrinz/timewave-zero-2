@@ -11,7 +11,7 @@ const NAV = [
   { href: '/about', label: 'ABOUT' },
 ];
 
-export function DOSFrame({ status, children }: { status?: ReactNode; children: ReactNode }) {
+export function DOSFrame({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   return (

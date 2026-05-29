@@ -29,9 +29,12 @@ export function ChartProvider({ layers, children }: { layers: OverlayLayer[]; ch
 
   // Post-mount: apply URL -> view ONCE (reading during render would cause a
   // hydration mismatch under static export). Then track back/forward.
+  // The URL is an external system we synchronize FROM on mount, so this
+  // setState-in-effect is intentional (not the "derived state" anti-pattern).
   useEffect(() => {
     const parsed = parseView(new URLSearchParams(window.location.search));
     if (parsed.error) console.warn(parsed.error);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from URL (external system) once on mount
     setViewRaw(parsed.view);
     didHydrate.current = true;
     const onPop = () => setViewRaw(parseView(new URLSearchParams(window.location.search)).view);

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Original DOS-prototype reference kept at repo root; not app source.
+    "test1.jsx",
   ]),
 ]);
 
