@@ -1,3 +1,21 @@
+'use client';
+import { Suspense } from 'react';
+import { ChartProvider } from '@/state/ChartProvider';
+import { ChartCanvas } from '@/components/ChartCanvas';
+import { GridLayer } from '@/chart/layers/GridLayer';
+import { WaveLayer } from '@/chart/layers/WaveLayer';
+import { MarkersLayer } from '@/chart/layers/MarkersLayer';
+
+// Module-level constant so the layers array reference is stable across renders
+// (ChartProvider memoizes on it).
+const LAYERS = [GridLayer, WaveLayer, MarkersLayer];
+
 export default function Page() {
-  return <div className="grid place-items-center h-full text-[var(--tw-dim)]">CHART LOADING — implemented in Task 12</div>;
+  return (
+    <Suspense fallback={null}>
+      <ChartProvider layers={LAYERS}>
+        <ChartCanvas />
+      </ChartProvider>
+    </Suspense>
+  );
 }
