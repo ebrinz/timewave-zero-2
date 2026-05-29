@@ -20,9 +20,11 @@ export function DateGoto({ onClose }: { onClose: () => void }) {
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-label="Go to date"
       className="fixed inset-0 grid place-items-center bg-black/70"
       onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="border border-[#163] bg-[#06090a] p-4 space-y-2">
         <label className="block text-xs" htmlFor="goto-input">GO TO DATE</label>
