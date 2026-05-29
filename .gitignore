@@ -15,3 +15,9 @@
 
 # typescript incremental build info
 *.tsbuildinfo
+
+# playwright/scratch screenshots
+/.playwright-mcp
+/og-chart.png
+/twz-*.png
+/help-page.png
