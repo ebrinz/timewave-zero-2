@@ -1,17 +1,82 @@
 @import "tailwindcss";
 
-/* --- Phosphor-green palette --- */
+/* --- Amiga Workbench 1.3 palette --- */
 :root {
-  --tw-bg: #06090a;
-  --tw-fg: #7fff9e;
-  --tw-dim: rgba(127, 255, 127, 0.45);
-  --tw-accent: #ffb84a;
+  --wb-blue:   #0055aa;   /* desktop */
+  --wb-blue-d: #003c78;   /* inactive title / shadow */
+  --wb-white:  #ffffff;
+  --wb-black:  #000000;
+  --wb-grey:   #a0a0a0;
+  --wb-orange: #ff8800;
+
+  /* Legacy --tw-* vars kept so existing pages re-skin without churn. */
+  --tw-bg: var(--wb-blue);
+  --tw-fg: var(--wb-white);
+  --tw-dim: rgba(255, 255, 255, 0.6);
+  --tw-accent: var(--wb-orange);
 }
 
 html, body {
-  background: var(--tw-bg);
-  color: var(--tw-fg);
+  background: var(--wb-blue);
+  color: var(--wb-white);
   font-family: var(--font-vt323), ui-monospace, monospace;
 }
 
-.phosphor-glow { text-shadow: 0 0 6px currentColor; }
+/* Flat Amiga text — the old CRT bloom would fight the crisp Workbench look. */
+.phosphor-glow { text-shadow: none; }
+
+/* --- Workbench chrome primitives --- */
+/* Beveled raised edge (light from top-left), as on Amiga gadgets/windows. */
+.wb-out {
+  border-top: 2px solid var(--wb-white);
+  border-left: 2px solid var(--wb-white);
+  border-right: 2px solid var(--wb-black);
+  border-bottom: 2px solid var(--wb-black);
+}
+.wb-in {
+  border-top: 2px solid var(--wb-black);
+  border-left: 2px solid var(--wb-black);
+  border-right: 2px solid var(--wb-white);
+  border-bottom: 2px solid var(--wb-white);
+}
+
+/* A draggable Workbench window. */
+.wb-win {
+  background: var(--wb-blue);
+  border: 2px solid var(--wb-black);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+.wb-title {
+  display: flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 2px;
+  background: var(--wb-white); color: var(--wb-black);
+  border-bottom: 2px solid var(--wb-black);
+  font-size: 15px; line-height: 1; letter-spacing: 0.5px;
+  user-select: none;
+}
+.wb-title--inactive { background: var(--wb-blue-d); color: var(--wb-white); }
+
+/* Close / depth gadgets — small beveled squares. */
+.wb-gad {
+  width: 18px; height: 18px; flex: none;
+  background: var(--wb-grey);
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+.wb-gad__dot { width: 8px; height: 8px; background: var(--wb-black); }
+.wb-gad__depth { width: 10px; height: 8px; border: 2px solid var(--wb-black); }
+
+/* Inset panel (dock / readout wells). */
+.wb-panel { background: var(--wb-grey); color: var(--wb-black); }
+
+/* Push button. */
+.wb-btn {
+  background: var(--wb-grey); color: var(--wb-black);
+  font-size: 14px; padding: 1px 8px; cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.wb-btn:active { filter: brightness(0.92); }
+.wb-btn--on { background: var(--wb-orange); }
+
+/* Small uppercase field label. */
+.wb-label { font-size: 11px; letter-spacing: 1px; color: var(--wb-blue-d); font-weight: bold; }

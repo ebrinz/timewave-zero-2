@@ -11,6 +11,12 @@ export function ChartCanvas() {
   const [dims, setDims] = useState<Dims>({ w: 800, h: 480 });
   const drag = useRef<{ x: number; view: typeof view } | null>(null);
 
+  // Latest view/dims for the imperative wheel listener (attached once, below).
+  // Synced in an effect — writing refs during render is disallowed.
+  const viewRef = useRef(view);
+  const dimsRef = useRef(dims);
+  useEffect(() => { viewRef.current = view; dimsRef.current = dims; });
+
   // Responsive sizing via ResizeObserver (client-only).
   useEffect(() => {
     const el = wrapRef.current;
@@ -36,14 +42,14 @@ export function ChartCanvas() {
     c.height = dims.h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, dims.w, dims.h);
-    ctx.fillStyle = '#06090a';
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, dims.w, dims.h);
     const raf = requestAnimationFrame(() => {
       for (const l of layers) {
         if (l.visible(view)) l.draw(ctx, view, dims, (l as { data?: unknown }).data);
       }
       if (hover) {
-        ctx.strokeStyle = 'rgba(127,255,127,0.5)';
+        ctx.strokeStyle = 'rgba(255,136,0,0.7)';
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(hover.x, 0); ctx.lineTo(hover.x, dims.h); ctx.stroke();
       }
@@ -51,10 +57,22 @@ export function ChartCanvas() {
     return () => cancelAnimationFrame(raf);
   }, [view, dims, layers, hover]);
 
-  const onWheel = (e: React.WheelEvent) => {
-    const x = e.nativeEvent.offsetX;
-    setView(zoomTo(view, xToT(x, view, dims.w), e.deltaY > 0 ? 1.1 : 0.9));
-  };
+  // Wheel-zoom is attached as a NON-PASSIVE native listener so preventDefault()
+  // actually fires — React's synthetic onWheel is passive, which lets a trackpad
+  // pinch (ctrl+wheel) zoom the whole browser page and a scroll bubble out of the
+  // panel. Confining it here keeps zoom strictly inside the chart, anchored at the
+  // cursor's time. (Refs supply the latest view/dims without re-subscribing.)
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const v = viewRef.current, w = dimsRef.current.w;
+      setView(zoomTo(v, xToT(e.offsetX, v, w), e.deltaY > 0 ? 1.1 : 0.9));
+    };
+    c.addEventListener('wheel', onWheel, { passive: false });
+    return () => c.removeEventListener('wheel', onWheel);
+  }, [setView]);
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { x: e.nativeEvent.offsetX, view };
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
@@ -78,7 +96,6 @@ export function ChartCanvas() {
         ref={canvasRef}
         aria-label="Timewave novelty chart"
         style={{ width: dims.w, height: dims.h, touchAction: 'none' }}
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

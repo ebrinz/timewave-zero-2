@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import { DOSFrame } from '@/components/DOSFrame';
+import { WorkbenchFrame } from '@/components/WorkbenchFrame';
 
 const vt323 = localFont({
   src: '../../public/fonts/VT323.ttf',
@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={vt323.variable}>
       <body>
-        <DOSFrame>{children}</DOSFrame>
+        <WorkbenchFrame>{children}</WorkbenchFrame>
       </body>
     </html>
   );

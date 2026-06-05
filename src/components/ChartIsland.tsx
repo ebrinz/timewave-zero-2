@@ -1,9 +1,7 @@
 'use client';
 import { Suspense } from 'react';
 import { ChartProvider } from '@/state/ChartProvider';
-import { ChartCanvas } from '@/components/ChartCanvas';
-import { ChartHUD } from '@/components/ChartHUD';
-import { LiveReadout } from '@/components/LiveReadout';
+import { ChartShell } from '@/components/ChartShell';
 import { GridLayer } from '@/chart/layers/GridLayer';
 import { WaveLayer } from '@/chart/layers/WaveLayer';
 import { MarkersLayer } from '@/chart/layers/MarkersLayer';
@@ -16,9 +14,7 @@ export function ChartIsland() {
   return (
     <Suspense fallback={null}>
       <ChartProvider layers={LAYERS}>
-        <ChartCanvas />
-        <LiveReadout />
-        <ChartHUD />
+        <ChartShell />
       </ChartProvider>
     </Suspense>
   );

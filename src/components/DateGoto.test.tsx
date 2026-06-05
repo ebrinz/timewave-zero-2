@@ -12,7 +12,7 @@ describe('DateGoto', () => {
     const onClose = vi.fn();
     render(wrap(<DateGoto onClose={onClose} />));
     await u.type(screen.getByRole('textbox'), 'not a date');
-    await u.click(screen.getByRole('button', { name: /go/i }));
+    await u.click(screen.getByRole('button', { name: /^ok$/i }));
     expect(screen.getByText(/unrecognized date/i)).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -21,7 +21,7 @@ describe('DateGoto', () => {
     const onClose = vi.fn();
     render(wrap(<DateGoto onClose={onClose} />));
     await u.type(screen.getByRole('textbox'), '1969-07-20');
-    await u.click(screen.getByRole('button', { name: /^\[ go \]$/i }));
+    await u.click(screen.getByRole('button', { name: /^ok$/i }));
     expect(onClose).toHaveBeenCalled();
   });
 });

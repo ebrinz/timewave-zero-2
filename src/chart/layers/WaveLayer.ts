@@ -22,7 +22,22 @@ export const WaveLayer: OverlayLayer = {
       mins[c] = lo; maxs[c] = hi;
       if (lo < vMin) vMin = lo; if (hi > vMax) vMax = hi;
     }
-    const range = Math.max(1e-6, vMax - vMin);
+    // Auto-fit to the visible window so the wave fills the frame at ANY zoom depth
+    // — this is what preserves "dramatic amplitude" as you dive into the fractal.
+    // The pad MUST be relative to the actual amplitude (not a fixed absolute
+    // floor): as you zoom in, raw novelty variation shrinks far below any absolute
+    // epsilon, so an absolute floor would squash the wave to a flat line. HEADROOM
+    // keeps crests/troughs off the exact edges. Only a genuinely flat slice
+    // (rawRange == 0, i.e. precision death) falls back to a centered line.
+    const HEADROOM = 0.07;
+    const rawRange = vMax - vMin;
+    if (rawRange > 0) {
+      const pad = rawRange * HEADROOM;
+      vMin -= pad; vMax += pad;
+    } else {
+      vMin -= 1; vMax += 1; // degenerate: draw a flat centered line
+    }
+    const range = vMax - vMin;
     const yOf = (v: number) => PAD_TOP + (1 - (v - vMin) / range) * usableH; // higher novelty value = lower on screen
     // envelope fill
     ctx.beginPath();
@@ -32,9 +47,9 @@ export const WaveLayer: OverlayLayer = {
     }
     for (let c = cols - 1; c >= 0; c--) { const x = (c / cols) * dims.w; ctx.lineTo(x, yOf(mins[c])); }
     ctx.closePath();
-    ctx.fillStyle = 'rgba(80,255,140,0.18)'; ctx.fill();
-    // crisp top edge
-    ctx.strokeStyle = '#7fff9e'; ctx.lineWidth = 1.4; ctx.beginPath();
+    ctx.fillStyle = 'rgba(90,150,230,0.22)'; ctx.fill();
+    // crisp top edge — bright Amiga white over the blue envelope
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4; ctx.beginPath();
     for (let c = 0; c < cols; c++) {
       const x = (c / cols) * dims.w;
       if (c === 0) ctx.moveTo(x, yOf(maxs[c])); else ctx.lineTo(x, yOf(maxs[c]));

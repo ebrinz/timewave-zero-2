@@ -24,6 +24,15 @@ describe('viewport math', () => {
     expect(c.tLeft).toBeLessThanOrEqual(LIMITS.maxT);
     expect(c.tRight).toBeGreaterThanOrEqual(LIMITS.minT);
   });
+  it('clamp caps zoom-out at the meaningful-wave span (never past the interface)', () => {
+    const c = clamp({ tLeft: 1e9, tRight: -1e9 });
+    expect(c.tLeft - c.tRight).toBeCloseTo(LIMITS.maxSpanDays, 3);
+  });
+  it('clamp keeps the center stationary when capping the span', () => {
+    const c = clamp({ tLeft: 5000 + 1e9, tRight: 5000 - 1e9 });
+    expect((c.tLeft + c.tRight) / 2).toBeCloseTo(5000, 3);
+    expect(c.tLeft - c.tRight).toBeCloseTo(LIMITS.maxSpanDays, 3);
+  });
   it('panBy shifts both edges equally', () => {
     const p = panBy(view, 1000);
     expect(p.tLeft - view.tLeft).toBeCloseTo(1000, 6);
