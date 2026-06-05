@@ -41,6 +41,14 @@ export function ChartDock() {
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Zoom</div>
+        <button
+          type="button"
+          className="wb-btn wb-out wb-btn--on text-left font-bold"
+          title="Zoom all the way out to the full timewave"
+          onClick={() => setView({ tLeft: SPAN_BOUNDS.max / 2, tRight: -SPAN_BOUNDS.max / 2 })}
+        >
+          ⊟ FULL WAVE
+        </button>
         {PRESETS.map((p) => (
           <button
             key={p.label}

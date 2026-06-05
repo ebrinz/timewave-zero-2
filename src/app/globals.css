@@ -80,3 +80,16 @@ html, body {
 
 /* Small uppercase field label. */
 .wb-label { font-size: 11px; letter-spacing: 1px; color: var(--wb-blue-d); font-weight: bold; }
+
+/* --- Guru Meditation (easter-egg crash requester) --- */
+.guru {
+  background: #000; color: #ff3b3b;
+  border: 3px solid #ff0000;
+  padding: 14px 20px; max-width: 540px; margin: 12px;
+  text-align: center; line-height: 1.35; cursor: default;
+  animation: guru-flash 0.9s steps(1, end) infinite;
+}
+.guru-head { font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-top: 6px; }
+.guru button { color: #ff3b3b; }
+@keyframes guru-flash { 50% { border-color: #000; } }
+@media (prefers-reduced-motion: reduce) { .guru { animation: none; } }
