@@ -16,6 +16,7 @@ def percentile_scores(sitelinks: List[int]) -> List[float]:
     n = len(sitelinks)
     if n <= 1:
         return [1.0] * n
+    # Ties break by original position (stable), giving adjacent ranks — fine for notability ordering.
     order = sorted(range(n), key=lambda i: sitelinks[i])
     out = [0.0] * n
     for rank, i in enumerate(order):
@@ -30,7 +31,7 @@ def build_centroid(text: str, embeddings: Dict[str, np.ndarray]) -> Optional[np.
         return None
     mean = np.mean(np.stack(vecs), axis=0).astype(np.float32)
     norm = float(np.linalg.norm(mean))
-    return mean if norm == 0 else (mean / norm).astype(np.float32)
+    return None if norm == 0 else (mean / norm).astype(np.float32)
 
 
 def raw_to_event(raw: dict, score: float) -> dict:
