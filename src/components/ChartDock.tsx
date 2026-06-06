@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { PRESETS, zoomDepth, SPAN_BOUNDS } from '@/chart/viewport';
+import { PRESETS, zoomDepth, SPAN_BOUNDS, zoomTo } from '@/chart/viewport';
 import { formatSpan } from '@/chart/time';
 import { novelty } from '@/chart/timewave';
 import { DateGoto } from './DateGoto';
@@ -41,6 +41,24 @@ export function ChartDock() {
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Zoom</div>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Zoom out"
+            onClick={() => setView(zoomTo(view, center, 1.25))}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Zoom in"
+            onClick={() => setView(zoomTo(view, center, 0.8))}
+          >
+            +
+          </button>
+        </div>
         <button
           type="button"
           className="wb-btn wb-out wb-btn--on text-left font-bold"
