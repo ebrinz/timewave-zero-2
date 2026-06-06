@@ -75,13 +75,21 @@ def raw_to_event(raw: dict, score: float) -> dict:
 
 def main() -> None:
     import json
+    import os
     import sys
     from pathlib import Path
     from binary_format import read_embeddings_binary, write_embeddings_binary
     from query_wikidata import fetch_raw
 
     repo = Path(__file__).resolve().parents[2]
-    emb_bin = Path("/Users/crashy/Development/technolabe/natal-chart-app/public/data/embeddings_7500.bin")
+    # GloVe word vectors (technolabe's built bin). Override with GLOVE_BIN; the default
+    # is the author's local copy. Checked up front so a bad path fails before the slow
+    # Wikidata fetch, with an actionable message.
+    default_emb = "/Users/crashy/Development/technolabe/natal-chart-app/public/data/embeddings_7500.bin"
+    emb_bin = Path(os.environ.get("GLOVE_BIN", default_emb))
+    if not emb_bin.exists():
+        sys.exit(f"embeddings bin not found: {emb_bin}\n"
+                 f"Set GLOVE_BIN=/path/to/embeddings_7500.bin (see scripts/build-events/README.md).")
     words, vectors = read_embeddings_binary(emb_bin)
     embeddings = {w: vectors[i] for i, w in enumerate(words)}
 
