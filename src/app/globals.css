@@ -78,6 +78,12 @@ html, body {
 .wb-btn:active { filter: brightness(0.92); }
 .wb-btn--on { background: var(--wb-orange); }
 
+/* Touch devices: enlarge push-button hit areas toward the ~44px guideline
+   without bulking up the compact desktop chrome. */
+@media (pointer: coarse) {
+  .wb-btn { padding-top: 8px; padding-bottom: 8px; }
+}
+
 /* Small uppercase field label. */
 .wb-label { font-size: 11px; letter-spacing: 1px; color: var(--wb-blue-d); font-weight: bold; }
 
