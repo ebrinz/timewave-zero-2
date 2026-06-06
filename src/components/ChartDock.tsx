@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { PRESETS, zoomDepth, SPAN_BOUNDS } from '@/chart/viewport';
+import { PRESETS, zoomDepth, SPAN_BOUNDS, zoomTo } from '@/chart/viewport';
 import { formatSpan } from '@/chart/time';
 import { novelty } from '@/chart/timewave';
 import { DateGoto } from './DateGoto';
@@ -18,7 +18,7 @@ export function ChartDock() {
   const depth = zoomDepth(view);
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-[150px] text-[13px]">
+    <div className="wb-panel wb-in flex flex-row flex-wrap sm:flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
       <div>
         <div className="wb-label">Span</div>
         <div className="font-bold">{formatSpan(span)}</div>
@@ -37,10 +37,28 @@ export function ChartDock() {
         <div className="font-bold tabular-nums">{novelty(center).toFixed(4)}</div>
       </div>
 
-      <hr className="border-t-2 border-black/40 my-0.5" />
+      <hr className="border-t-2 border-black/40 my-0.5 hidden sm:block w-full" />
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Zoom</div>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Zoom out"
+            onClick={() => setView(zoomTo(view, center, 1.25))}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Zoom in"
+            onClick={() => setView(zoomTo(view, center, 0.8))}
+          >
+            +
+          </button>
+        </div>
         <button
           type="button"
           className="wb-btn wb-out wb-btn--on text-left font-bold"

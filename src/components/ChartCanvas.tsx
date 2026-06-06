@@ -1,15 +1,26 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { xToT, zoomTo, panBy, type Dims } from '@/chart/viewport';
+import { xToT, zoomTo, panBy, type Dims, type Viewport } from '@/chart/viewport';
 import { novelty } from '@/chart/timewave';
+import { distance, midpoint, isTap, type Pt } from '@/chart/gestures';
 
 export function ChartCanvas() {
   const { view, setView, hover, setHover, layers } = useChart();
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dims, setDims] = useState<Dims>({ w: 800, h: 480 });
-  const drag = useRef<{ x: number; view: typeof view } | null>(null);
+  // Active pointers (mouse or touch), keyed by pointerId, for multi-touch.
+  const pointers = useRef(new Map<number, Pt>());
+  // The in-flight gesture. A one-finger 'pan' records the view + start point at
+  // press time and the max travel since (a travel-free release reads as a tap).
+  // A two-finger 'pinch' tracks the last finger distance to derive a per-frame
+  // zoom ratio.
+  const gesture = useRef<
+    | { kind: 'pan'; startX: number; startY: number; view: Viewport; moved: number }
+    | { kind: 'pinch'; lastDist: number }
+    | null
+  >(null);
 
   // Latest view/dims for the imperative wheel listener (attached once, below).
   // Synced in an effect — writing refs during render is disallowed.
@@ -73,22 +84,78 @@ export function ChartCanvas() {
     c.addEventListener('wheel', onWheel, { passive: false });
     return () => c.removeEventListener('wheel', onWheel);
   }, [setView]);
+  const ptOf = (e: React.PointerEvent): Pt => ({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
+
   const onPointerDown = (e: React.PointerEvent) => {
-    drag.current = { x: e.nativeEvent.offsetX, view };
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    const x = e.nativeEvent.offsetX;
-    if (drag.current) {
-      const span = drag.current.view.tLeft - drag.current.view.tRight;
-      const dt = ((x - drag.current.x) / dims.w) * span;
-      setView(panBy(drag.current.view, dt));
+    // Capture so a finger/cursor that drifts off the canvas keeps driving the
+    // gesture. Tolerate environments where the pointer isn't capturable.
+    try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* no-op */ }
+    pointers.current.set(e.pointerId, ptOf(e));
+    if (pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = { kind: 'pinch', lastDist: distance(a, b) };
     } else {
-      const t = xToT(x, view, dims.w);
-      setHover({ t, x, y: e.nativeEvent.offsetY, novelty: novelty(t) });
+      const p = ptOf(e);
+      gesture.current = { kind: 'pan', startX: p.x, startY: p.y, view: viewRef.current, moved: 0 };
     }
   };
-  const onPointerUp = () => { drag.current = null; };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const p = ptOf(e);
+    if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, p);
+    const g = gesture.current;
+
+    if (g?.kind === 'pinch' && pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()];
+      const dist = distance(a, b);
+      if (dist > 0) {
+        const mid = midpoint(a, b);
+        const v = viewRef.current, w = dimsRef.current.w;
+        setView(zoomTo(v, xToT(mid.x, v, w), g.lastDist / dist));
+        g.lastDist = dist;
+      }
+      return;
+    }
+
+    if (g?.kind === 'pan') {
+      g.moved = Math.max(g.moved, Math.hypot(p.x - g.startX, p.y - g.startY));
+      const span = g.view.tLeft - g.view.tRight;
+      const dt = ((p.x - g.startX) / dimsRef.current.w) * span;
+      setView(panBy(g.view, dt));
+      return;
+    }
+
+    // No active gesture → mouse hover (touch never moves without a pointer down).
+    if (pointers.current.size === 0) {
+      const v = viewRef.current;
+      const t = xToT(p.x, v, dimsRef.current.w);
+      setHover({ t, x: p.x, y: p.y, novelty: novelty(t) });
+    }
+  };
+
+  const endPointer = (e: React.PointerEvent) => {
+    const g = gesture.current;
+    const p = ptOf(e);
+    pointers.current.delete(e.pointerId);
+
+    // A travel-free one-finger release is a tap → drop a persistent readout.
+    if (g?.kind === 'pan' && isTap(g.moved)) {
+      const v = viewRef.current;
+      const t = xToT(p.x, v, dimsRef.current.w);
+      setHover({ t, x: p.x, y: p.y, novelty: novelty(t) });
+    }
+
+    // Re-derive the gesture from whatever fingers remain down.
+    if (pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = { kind: 'pinch', lastDist: distance(a, b) };
+    } else if (pointers.current.size === 1) {
+      const [only] = [...pointers.current.values()];
+      gesture.current = { kind: 'pan', startX: only.x, startY: only.y, view: viewRef.current, moved: 0 };
+    } else {
+      gesture.current = null;
+    }
+  };
 
   return (
     <div ref={wrapRef} className="absolute inset-0">
@@ -98,8 +165,17 @@ export function ChartCanvas() {
         style={{ width: dims.w, height: dims.h, touchAction: 'none' }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={() => { drag.current = null; setHover(null); }}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
+        onPointerLeave={(e) => {
+          // Only the mouse "leaves" without a release; touch is cleaned up on
+          // up/cancel (with capture, leave doesn't fire mid-pinch).
+          if (e.pointerType === 'mouse') {
+            pointers.current.delete(e.pointerId);
+            gesture.current = null;
+            setHover(null);
+          }
+        }}
       />
     </div>
   );
