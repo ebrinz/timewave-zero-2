@@ -1,5 +1,20 @@
 import numpy as np
-from build_events import percentile_scores, build_centroid, raw_to_event
+from build_events import (
+    percentile_scores, build_centroid, raw_to_event, is_calendar_label, is_unlabeled,
+)
+
+
+def test_is_calendar_label_drops_periods_keeps_events():
+    for junk in ["2010", "2010s", "90s", "21st century", "3rd millennium", "44 BC", "1 CE"]:
+        assert is_calendar_label(junk), junk
+    for ok in ["French Revolution", "2018 FIFA World Cup", "September 11 attacks", "Apollo 11"]:
+        assert not is_calendar_label(ok), ok
+
+
+def test_is_unlabeled_drops_bare_qids():
+    assert is_unlabeled("Q23108") and is_unlabeled(" Q5 ")
+    assert not is_unlabeled("Treaty of Versailles")
+
 
 EMB = {
     "atomic": np.array([1.0, 0.0, 0.0], dtype=np.float32),
