@@ -34,7 +34,6 @@ def year_to_date(year: int) -> Union[datetime, float]:
 def _astro_year_unix(year: int) -> float:
     # Python datetime cannot hold year < 1; compute the Unix timestamp directly.
     # Use the proleptic Gregorian mean year length relative to year 1, June 15.
-    from datetime import timedelta
     base = datetime(1, 6, 15, tzinfo=timezone.utc)
     delta_days = (year - 1) * 365.2425
     return base.timestamp() + delta_days * 86400
