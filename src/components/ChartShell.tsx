@@ -20,7 +20,7 @@ export function ChartShell() {
     <div className="absolute inset-3 sm:inset-4 flex">
       <WorkbenchWindow
         className="flex-1"
-        bodyClassName="flex min-h-0"
+        bodyClassName="flex flex-col sm:flex-row min-h-0"
         prankGadgets
         title={<span className="tabular-nums">TIMEWAVE.CHART — {centerInstant}</span>}
       >

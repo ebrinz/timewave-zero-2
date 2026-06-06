@@ -18,7 +18,7 @@ export function ChartDock() {
   const depth = zoomDepth(view);
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-[150px] text-[13px]">
+    <div className="wb-panel wb-in flex flex-row flex-wrap sm:flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
       <div>
         <div className="wb-label">Span</div>
         <div className="font-bold">{formatSpan(span)}</div>
@@ -37,7 +37,7 @@ export function ChartDock() {
         <div className="font-bold tabular-nums">{novelty(center).toFixed(4)}</div>
       </div>
 
-      <hr className="border-t-2 border-black/40 my-0.5" />
+      <hr className="border-t-2 border-black/40 my-0.5 hidden sm:block w-full" />
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Zoom</div>
