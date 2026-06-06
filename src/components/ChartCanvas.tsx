@@ -87,7 +87,9 @@ export function ChartCanvas() {
   const ptOf = (e: React.PointerEvent): Pt => ({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
 
   const onPointerDown = (e: React.PointerEvent) => {
-    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    // Capture so a finger/cursor that drifts off the canvas keeps driving the
+    // gesture. Tolerate environments where the pointer isn't capturable.
+    try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* no-op */ }
     pointers.current.set(e.pointerId, ptOf(e));
     if (pointers.current.size >= 2) {
       const [a, b] = [...pointers.current.values()];
