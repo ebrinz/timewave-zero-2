@@ -22,9 +22,11 @@ export function WorkbenchFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col h-screen wb-out" style={{ background: 'var(--wb-blue)' }}>
       <Hotkeys onHelp={() => router.push('/help')} onAbout={() => router.push('/about')} onChart={() => router.push('/')} />
-      <header className="wb-title flex justify-between items-center px-2">
-        <span className="phosphor-glow font-bold">Timewave Zero 2 · Novelty Theory Workbench</span>
-        <nav className="flex items-center gap-3">
+      <header className="wb-title flex justify-between items-center gap-2 px-2">
+        <span className="phosphor-glow font-bold truncate">
+          Timewave Zero 2<span className="hidden sm:inline"> · Novelty Theory Workbench</span>
+        </span>
+        <nav className="flex shrink-0 items-center gap-2 sm:gap-3 whitespace-nowrap">
           {NAV.map((n) => {
             const active = n.href === '/' ? path === '/' : path.startsWith(n.href);
             return (
