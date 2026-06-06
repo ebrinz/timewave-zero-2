@@ -133,13 +133,23 @@ join the two files.
 
 3. **`build_events.py`** — for each event: resolve date → `t`; compute
    `score` = percentile rank of sitelinks; build the centroid by tokenizing
-   `title + " " + summary`, lower-casing, looking up GloVe 6B 300d vectors (reuse
-   `../technolabe/packages/semantic-data/scripts/common/vector_utils.py`),
-   averaging, L2-normalizing. De-dupe by QID; drop undated. Write `events.json`
-   and `events.bin`. Stamp `wave_variant` from a single shared constant.
+   `title + " " + summary`, lower-casing, looking up word vectors, averaging,
+   L2-normalizing (reuse the vector-averaging logic from
+   `../technolabe/packages/semantic-data/scripts/common/vector_utils.py`). De-dupe
+   by QID; drop undated. Write `events.json` and `events.bin`. Stamp `wave_variant`
+   from a single shared constant.
 
-GloVe source: the same `glove.6B.300d` technolabe's `process_glove.py` already
-consumes. The pipeline reads it locally at build time; it is **never shipped** in B.
+**Vector source (decided 2026-06-06): reuse technolabe's existing
+`embeddings_7500.bin`** (7500 words × 300d float32) as the word-vector lookup —
+the raw `glove.6B.300d.txt` (2.2 GB) is **not** on this machine and B does not need
+it. The pipeline reads `embeddings_7500.bin` locally at build time (parse: `u32`
+count, `u32` dim, null-terminated lowercased words, then contiguous float32
+vectors); it is **never shipped** in B. Tokens outside the 7500 vocab are skipped
+from a centroid; an all-OOV event keeps its `events.json` row but gets no
+`events.bin` vector. Downloading raw GloVe and rebuilding the vocab with I Ching
+imagery is **deferred to C** (where the word cloud needs richer coverage). The
+`events.json` `"glove"` field records the source, e.g.
+`"technolabe-embeddings-7500-glove6B-300d"`.
 
 ## Time-mapping parity (EXTENSION-POINTS §1)
 
@@ -217,6 +227,10 @@ src/components/ChartIsland.tsx    # append EventsLayer to LAYERS
   density keep it legible. Vocabulary/coverage tuning is iterative.
 - **Date edge cases** (BCE, ranges, circa) → start-instant rule; BCE handled by the
   `yearToDate` mirror; undated dropped.
+- **Vocab coverage** (7500-word bin is astro/tarot-curated + top-frequency English)
+  → some event-specific tokens go OOV, softening those centroids; acceptable for B,
+  and C's raw-GloVe vocab rebuild improves it. Event rendering never depends on a
+  vector, so coverage gaps never hide an event from the timeline.
 - **GloVe licensing** → Apache 2.0; Wikidata is CC0, Wikipedia text CC BY-SA
   (we store only short summaries + links). Note attribution in the pipeline README.
 
