@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Original DOS-prototype reference kept at repo root; not app source.
     "test1.jsx",
+    // SW template — plain browser JS (uses self/caches), not app source.
+    "public/**",
   ]),
 ]);
 
