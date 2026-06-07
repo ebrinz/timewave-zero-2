@@ -32,7 +32,7 @@ export function buildPrecache(outDir, base) {
     const rel = relative(outDir, f).replace(/\\/g, '/');
     urls.push(`${base}/${rel}`);
     hash.update(rel);
-    hash.update(String(statSync(f).size));
+    hash.update(readFileSync(f));
   }
   return { urls, version: hash.digest('hex').slice(0, 12) };
 }

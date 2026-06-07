@@ -20,16 +20,23 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  // Static export uses trailingSlash: a navigate to '/x/' maps to precached '/x/index.html'.
+  const cacheKey = req.mode === 'navigate'
+    ? new Request(req.url.replace(/\/$/, '') + '/index.html')
+    : req;
   e.respondWith(
-    caches.match(req).then((hit) =>
-      hit ||
-      fetch(req)
-        .then((res) => {
+    caches.match(cacheKey).then(async (hit) => {
+      if (hit) return hit;
+      try {
+        const res = await fetch(req);
+        if (res.ok) {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-          return res;
-        })
-        .catch(() => (req.mode === 'navigate' ? caches.match(SHELL) : Response.error())),
-    ),
+          e.waitUntil(caches.open(CACHE).then((c) => c.put(req, copy)));
+        }
+        return res;
+      } catch {
+        return req.mode === 'navigate' ? caches.match(SHELL) : Response.error();
+      }
+    }),
   );
 });
