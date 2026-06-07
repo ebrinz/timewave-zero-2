@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { PRESETS, zoomDepth, SPAN_BOUNDS, zoomTo } from '@/chart/viewport';
-import { formatSpan } from '@/chart/time';
+import { PRESETS, zoomDepth, SPAN_BOUNDS, zoomTo, panBy } from '@/chart/viewport';
+import { formatSpan, dateToT } from '@/chart/time';
 import { novelty } from '@/chart/timewave';
 import { DateGoto } from './DateGoto';
 
@@ -41,6 +41,37 @@ export function ChartDock() {
       </div>
 
       <hr className="border-t-2 border-black/40 my-0.5 hidden sm:block w-full" />
+
+      {/* Navigate: pan a third of a screen earlier/later, or jump to the present. */}
+      <div className="flex flex-col gap-1">
+        <div className="wb-label">Go</div>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Pan to earlier time"
+            onClick={() => setView(panBy(view, span * 0.3))}
+          >
+            ◀
+          </button>
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold whitespace-nowrap"
+            title="Jump to the present moment"
+            onClick={() => { const t = dateToT(new Date()); setView({ tLeft: t + span / 2, tRight: t - span / 2 }); }}
+          >
+            NOW
+          </button>
+          <button
+            type="button"
+            className="wb-btn wb-out flex-1 font-bold"
+            aria-label="Pan to later time"
+            onClick={() => setView(panBy(view, -span * 0.3))}
+          >
+            ▶
+          </button>
+        </div>
+      </div>
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Zoom</div>
