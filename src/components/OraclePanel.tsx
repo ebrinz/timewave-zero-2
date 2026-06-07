@@ -46,23 +46,26 @@ export function OraclePanel() {
   }, [hexVec, eventVecs, events]);
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-1 p-2 w-full sm:w-[220px] text-[13px]">
+    <div className="wb-panel wb-in w-full p-2 flex flex-col items-center gap-1 text-[13px]">
       <div className="wb-label">Oracle</div>
-      <div className="flex items-center gap-2">
-        <span className="text-2xl leading-none" aria-hidden="true">{active.glyph}</span>
-        <span className="font-bold">{active.kingWen}. {hex?.name ?? '…'}</span>
-      </div>
-      {hex && <div className="text-[12px] leading-tight">{composeReading(hex, cloud)}</div>}
+      <span className="text-5xl sm:text-6xl leading-none" aria-hidden="true">{active.glyph}</span>
+      <div className="font-bold text-base tabular-nums">{active.kingWen} · {hex?.name ?? '…'}</div>
+      {hex && (
+        <div className="text-center max-w-prose leading-tight">{composeReading(hex, cloud)}</div>
+      )}
       {cloud.length > 0 && (
-        <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[11px]" style={{ color: 'var(--wb-blue-d)' }}>
+        <div className="flex flex-wrap justify-center gap-x-3 gap-y-0.5 text-[12px]" style={{ color: 'var(--wb-blue-d)' }}>
           {cloud.map((w) => <span key={w}>{w}</span>)}
         </div>
       )}
       {echoes.length > 0 && (
-        <div className="text-[11px] mt-0.5">
-          <span className="wb-label">Echoes</span>
-          {echoes.map((e) => (
-            <div key={e.id} className="truncate"><a href={e.url} target="_blank" rel="noreferrer" className="underline">{e.title}</a> · {e.year}</div>
+        <div className="text-[11px] text-center max-w-prose">
+          <span className="wb-label">Echoes </span>
+          {echoes.map((e, i) => (
+            <span key={e.id}>
+              {i > 0 && ' · '}
+              <a href={e.url} target="_blank" rel="noreferrer" className="underline">{e.title}</a> ({e.year})
+            </span>
           ))}
         </div>
       )}

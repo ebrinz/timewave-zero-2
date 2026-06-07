@@ -34,7 +34,7 @@ export function ChartCanvas() {
     if (!el) return;
     const update = () => {
       const r = el.getBoundingClientRect();
-      setDims({ w: Math.max(320, Math.floor(r.width)), h: Math.max(320, Math.floor(r.height)) });
+      setDims({ w: Math.max(320, Math.floor(r.width)), h: Math.max(160, Math.floor(r.height)) });
     };
     update();
     const ro = new ResizeObserver(update);
