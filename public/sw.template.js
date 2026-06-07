@@ -5,8 +5,22 @@ const CACHE = 'twz-__VERSION__';
 const PRECACHE = __PRECACHE__;
 const SHELL = '__SHELL__';
 
+// Precache each URL, stripping the redirect flag — a redirected response cannot
+// satisfy a navigation request (the browser fails it), and some static hosts
+// redirect directory/index paths.
+async function precache(cache) {
+  await Promise.all(PRECACHE.map(async (url) => {
+    try {
+      const res = await fetch(url, { cache: 'reload' });
+      if (!res.ok) return;
+      const body = await res.blob();
+      await cache.put(url, new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }));
+    } catch {}
+  }));
+}
+
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(precache).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
