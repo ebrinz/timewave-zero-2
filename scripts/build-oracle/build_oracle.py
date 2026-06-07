@@ -57,3 +57,95 @@ def centroid(words: List[str], embeddings: Dict[str, np.ndarray]) -> np.ndarray:
     mean = np.mean(np.stack(vecs), axis=0).astype(np.float32)
     n = float(np.linalg.norm(mean))
     return mean if n == 0 else (mean / n).astype(np.float32)
+
+
+def main() -> None:
+    import json
+    import os
+    import sys
+    import struct
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "build-events"))
+    from binary_format import write_embeddings_binary
+
+    repo = Path(__file__).resolve().parents[2]
+    glove_txt = Path(os.environ.get("GLOVE_TXT", "scripts/build-oracle/glove.6B.300d.txt"))
+    if not glove_txt.exists():
+        sys.exit(f"raw GloVe not found: {glove_txt}\nSet GLOVE_TXT=/path/to/glove.6B.300d.txt")
+
+    src = json.loads((Path(__file__).parent / "hexagrams_source.json").read_text())
+    events = json.loads((repo / "public/data/events.json").read_text())["events"]
+    event_tokens = {t for e in events for t in _TOKEN.findall(f"{e['title']} {e['summary']}".lower())}
+
+    # seed words + glyphs per hexagram; collect the required-word set the GloVe pass keeps
+    for h in src:
+        h["seedWords"] = seed_words(h["name"], h["judgment"], h["image"])
+        h["glyph"] = chr(0x4DC0 + h["n"] - 1)
+    seeds = {w for h in src for w in h["seedWords"]}
+    required = seeds | event_tokens
+
+    # one streaming pass over GloVe: keep required words + top-frequency fill (cap ~10k)
+    DIM, CAP = 300, 10000
+    emb: Dict[str, np.ndarray] = {}
+    frequent: List[str] = []
+    with open(glove_txt, "r", encoding="utf-8") as f:
+        for line in f:
+            parts = line.rstrip().split(" ")
+            w = parts[0]
+            if w in required or len(frequent) < CAP:
+                emb[w] = np.asarray(parts[1:1 + DIM], dtype=np.float32)
+                if w not in required:
+                    frequent.append(w)
+    vocab = [w for w in assemble_vocab(seeds, event_tokens, frequent, CAP) if w in emb]
+
+    out = repo / "public/data"
+    out.mkdir(parents=True, exist_ok=True)
+
+    # Common-component removal: subtract the vocab mean before normalizing. Raw GloVe
+    # centroids drift toward high-frequency "central" words (could/would/come…), which
+    # then dominate every word cloud; centering removes that shared direction so the
+    # nearest neighbours are evocative imagery instead. Applied to ALL three artifacts
+    # with the SAME mean so cosine stays consistent across them (runtime is plain cosine).
+    mat = np.stack([emb[w] for w in vocab])
+    mean = mat.mean(axis=0).astype(np.float32)
+
+    def centered_centroid(words: List[str]) -> np.ndarray:
+        vecs = [emb[w] for w in words if w in emb]
+        if not vecs:
+            return np.zeros(DIM, dtype=np.float32)
+        c = (np.mean(np.stack(vecs), axis=0) - mean).astype(np.float32)
+        n = float(np.linalg.norm(c))
+        return c if n == 0 else (c / n).astype(np.float32)
+
+    # glove_q.bin (int8): centered then quantized (quantize_int8 re-normalizes rows)
+    q = quantize_int8(mat - mean)
+    buf = bytearray(struct.pack("<II", len(vocab), DIM))
+    for w in vocab:
+        buf += w.encode("utf-8") + b"\x00"
+    buf += q.tobytes()
+    (out / "glove_q.bin").write_bytes(buf)
+
+    # events.bin: regenerate centered (same space as the cloud + hexagrams) for
+    # resonance. Overwrites B's uncentered copy — only the oracle consumes events.bin;
+    # B's EventsLayer reads events.json, so its rendering is unaffected.
+    ev_centroids = np.stack([
+        centered_centroid(_TOKEN.findall(f"{e['title']} {e['summary']}".lower())) for e in events
+    ]).astype(np.float32)
+    write_embeddings_binary([e["id"] for e in events], ev_centroids, out / "events.bin")
+
+    # hexagrams_64.bin (float32 centered centroids) + hexagrams.json (eager content),
+    # both in King Wen number order (1..64)
+    ordered = sorted(src, key=lambda h: h["n"])
+    cents = np.stack([centered_centroid(h["seedWords"]) for h in ordered]).astype(np.float32)
+    write_embeddings_binary([str(h["n"]) for h in ordered], cents, out / "hexagrams_64.bin")
+    (out / "hexagrams.json").write_text(json.dumps({
+        "wave_variant": WAVE_VARIANT,
+        "hexagrams": [{"n": h["n"], "glyph": h["glyph"], "name": h["name"],
+                       "judgment": h["judgment"], "image": h["image"], "seedWords": h["seedWords"]}
+                      for h in ordered],
+    }, ensure_ascii=False, indent=0))
+    print(f"wrote {len(vocab)} vocab words, 64 hexagrams", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
