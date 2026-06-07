@@ -31,6 +31,7 @@ describe('reading', () => {
     expect(line).toContain('Line 3');
     expect(line).toMatch(/ingress/i);
     expect(line).toContain('rain');
+    expect(line).toContain('release');
   });
   it('Hexagram type carries judgment + lines (compile check)', () => {
     const h: Hexagram = { n: 1, glyph: '䷀', name: 'The Creative', judgment: 'x', lines: ['a','b','c','d','e','f'], seedWords: [] };

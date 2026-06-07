@@ -20,7 +20,7 @@ const WEAK = new Set([
 
 /** Nearest GloVe words to the hexagram centroid, weak words filtered out. */
 export function wordCloud(hexVec: Float32Array, glove: VectorSet, k: number): string[] {
-  return cosineTopK(hexVec, glove, Math.max(k * 3, 24))
+  return cosineTopK(hexVec, glove, Math.max(k * 4, 32))
     .map((e) => e.word)
     .filter((w) => !WEAK.has(w))
     .slice(0, k);
