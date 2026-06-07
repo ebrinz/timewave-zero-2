@@ -40,4 +40,10 @@ describe('quant', () => {
     expect(top.map((t) => t.word)).toEqual(['x', 'y']);
     expect(top[0].score).toBeGreaterThan(top[1].score);
   });
+
+  it('throws on a truncated bin', () => {
+    const full = buildBin(['a', 'b'], [[1, 2], [3, 4]], 'f32');
+    const truncated = full.slice(0, full.byteLength - 4); // drop one float row's worth
+    expect(() => readFloatBin(truncated)).toThrow(/truncated/);
+  });
 });

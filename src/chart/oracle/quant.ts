@@ -23,6 +23,7 @@ function readNames(dv: DataView, count: number, start: number): { words: string[
 export function readQuantizedBin(buf: ArrayBuffer): VectorSet {
   const { count, dim, dv } = header(buf);
   const { words, offset } = readNames(dv, count, 8);
+  if (offset + count * dim > dv.buffer.byteLength) throw new Error('quant bin truncated');
   const vectors = new Float32Array(count * dim);
   for (let i = 0; i < vectors.length; i++) vectors[i] = dv.getInt8(offset + i) / 127;
   return { words, dim, vectors };
@@ -32,6 +33,7 @@ export function readQuantizedBin(buf: ArrayBuffer): VectorSet {
 export function readFloatBin(buf: ArrayBuffer): VectorSet {
   const { count, dim, dv } = header(buf);
   const { words, offset } = readNames(dv, count, 8);
+  if (offset + count * dim * 4 > dv.buffer.byteLength) throw new Error('float bin truncated');
   const vectors = new Float32Array(count * dim);
   for (let i = 0; i < vectors.length; i++) vectors[i] = dv.getFloat32(offset + i * 4, true);
   return { words, dim, vectors };
