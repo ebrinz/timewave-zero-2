@@ -29,7 +29,10 @@ export function OraclePanel() {
 
   const active = useMemo(() => activeHexagram(view), [view]);
   const hex = hexData?.hexagrams[active.ordinal] ?? null;
-  const hexVec = hexVecs ? sliceVector(hexVecs, active.ordinal) : null;
+  const hexVec = useMemo(
+    () => (hexVecs ? sliceVector(hexVecs, active.ordinal) : null),
+    [hexVecs, active.ordinal],
+  );
 
   const cloud = useMemo(
     () => (hexVec && glove ? wordCloud(hexVec, glove, 8) : []),
