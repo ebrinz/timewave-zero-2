@@ -21,12 +21,12 @@ export function ChartShell() {
     <div className="absolute inset-3 sm:inset-4 flex">
       <WorkbenchWindow
         className="flex-1"
-        bodyClassName="flex flex-col min-h-0 overflow-y-auto sm:overflow-hidden"
+        bodyClassName="flex flex-col min-h-0 overflow-hidden"
         prankGadgets
         title={<span className="tabular-nums">TIMEWAVE.CHART — {centerInstant}</span>}
       >
-        <div className="flex flex-col sm:flex-row sm:min-h-0 sm:flex-1">
-          <div className="relative bg-black overflow-hidden min-h-[300px] sm:flex-1 sm:min-h-0">
+        <div className="flex flex-col sm:flex-row min-h-0 flex-1">
+          <div className="relative flex-1 min-h-0 bg-black overflow-hidden">
             <ChartCanvas />
             <LiveReadout />
           </div>

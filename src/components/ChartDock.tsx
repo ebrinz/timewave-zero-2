@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { PRESETS, zoomDepth, SPAN_BOUNDS, zoomTo, panBy } from '@/chart/viewport';
+import { zoomDepth, SPAN_BOUNDS, zoomTo, panBy } from '@/chart/viewport';
 import { formatSpan, dateToT } from '@/chart/time';
 import { novelty } from '@/chart/timewave';
 import { DateGoto } from './DateGoto';
@@ -18,7 +18,7 @@ export function ChartDock() {
   const depth = zoomDepth(view);
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px] sm:min-h-0 sm:overflow-y-auto">
+    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
       {/* Stat readouts: a row on phones, a column in the desktop side-dock. */}
       <div className="flex flex-row sm:flex-col gap-4 sm:gap-2">
         <div>
@@ -132,20 +132,6 @@ export function ChartDock() {
           >
             ⊟ FULL WAVE
           </button>
-        </div>
-
-        {/* Presets: a row of chips on phones, a column in the side-dock. */}
-        <div className="grid grid-cols-5 sm:grid-cols-1 gap-1">
-          {PRESETS.map((p) => (
-            <button
-              key={p.label}
-              type="button"
-              className="wb-btn wb-out text-center sm:text-left"
-              onClick={() => setView({ tLeft: center + p.span / 2, tRight: center - p.span / 2 })}
-            >
-              {p.label}
-            </button>
-          ))}
         </div>
       </div>
 
