@@ -5,6 +5,7 @@ import { WorkbenchWindow } from './WorkbenchWindow';
 import { ChartCanvas } from './ChartCanvas';
 import { LiveReadout } from './LiveReadout';
 import { ChartDock } from './ChartDock';
+import { OraclePanel } from './OraclePanel';
 
 /**
  * Layout C: the chart framed as a single Workbench window centered on the
@@ -20,15 +21,20 @@ export function ChartShell() {
     <div className="absolute inset-3 sm:inset-4 flex">
       <WorkbenchWindow
         className="flex-1"
-        bodyClassName="flex flex-col sm:flex-row min-h-0"
+        bodyClassName="flex flex-col min-h-0"
         prankGadgets
         title={<span className="tabular-nums">TIMEWAVE.CHART — {centerInstant}</span>}
       >
-        <div className="relative flex-1 min-h-0 bg-black">
-          <ChartCanvas />
-          <LiveReadout />
+        <div className="flex flex-col sm:flex-row min-h-0 flex-1">
+          <div className="relative flex-1 min-h-0 bg-black">
+            <ChartCanvas />
+            <LiveReadout />
+          </div>
+          <ChartDock />
         </div>
-        <ChartDock />
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
+          <OraclePanel />
+        </div>
       </WorkbenchWindow>
     </div>
   );
