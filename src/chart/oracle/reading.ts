@@ -19,6 +19,7 @@ export function resonantEvents(hexVec: Float32Array, events: VectorSet, k: numbe
 /** A terse oracular line: the judgment's first sentence woven with two cloud words. */
 export function composeReading(hex: Hexagram, cloudWords: string[]): string {
   const first = (hex.judgment.split(/(?<=[.!?])\s/)[0] || hex.judgment).trim();
+  const ending = /[.!?]$/.test(first) ? first : `${first}.`;
   const tail = cloudWords.slice(0, 2).join(', ');
-  return tail ? `${first} — ${tail}.` : first;
+  return tail ? `${ending} — ${tail}.` : ending;
 }

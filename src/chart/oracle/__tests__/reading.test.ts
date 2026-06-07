@@ -35,4 +35,9 @@ describe('reading', () => {
     expect(line).toContain('Deliverance');
     expect(line).toContain('thaw');
   });
+
+  it('composeReading still ends with punctuation when the cloud is empty', () => {
+    const hex: Hexagram = { n: 1, glyph: '䷀', name: 'The Creative', judgment: 'The Creative works sublime success', image: '', seedWords: [] };
+    expect(composeReading(hex, [])).toMatch(/\.$/);
+  });
 });
