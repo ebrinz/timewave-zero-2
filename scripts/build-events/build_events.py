@@ -75,58 +75,37 @@ def raw_to_event(raw: dict, score: float) -> dict:
 
 def main() -> None:
     import json
-    import os
     import sys
     from pathlib import Path
-    from binary_format import read_embeddings_binary, write_embeddings_binary
     from query_wikidata import fetch_raw
 
     repo = Path(__file__).resolve().parents[2]
-    # GloVe word vectors (technolabe's built bin). Override with GLOVE_BIN; the default
-    # is the author's local copy. Checked up front so a bad path fails before the slow
-    # Wikidata fetch, with an actionable message.
-    default_emb = "/Users/crashy/Development/technolabe/natal-chart-app/public/data/embeddings_7500.bin"
-    emb_bin = Path(os.environ.get("GLOVE_BIN", default_emb))
-    if not emb_bin.exists():
-        sys.exit(f"embeddings bin not found: {emb_bin}\n"
-                 f"Set GLOVE_BIN=/path/to/embeddings_7500.bin (see scripts/build-events/README.md).")
-    words, vectors = read_embeddings_binary(emb_bin)
-    embeddings = {w: vectors[i] for i, w in enumerate(words)}
-
     now = datetime.now(timezone.utc)
     raw = fetch_raw()
-    # Keep ISO dates Python can parse; drop BCE (rare among top-sitelink events) for v1;
-    # drop calendar-period entries (years/decades/centuries) and unlabeled QID rows.
     raw = [r for r in raw
            if r["iso"][0] != "-"
            and not is_calendar_label(r["title"])
            and not is_unlabeled(r["title"])]
     scores = percentile_scores([r["sitelinks"] for r in raw])
 
-    events, ids, vecs = [], [], []
+    events = []
     for r, s in zip(raw, scores):
         try:
             ev = raw_to_event(r, s)
         except (ValueError, KeyError):
-            continue  # un-parseable date or missing field — skip defensively
+            continue
         if ev["t"] < date_to_t(now):
-            continue  # B is the historical (past) timeline; the future side is subproject C
+            continue  # B is the historical (past) timeline
         events.append(ev)
-        c = build_centroid(f"{ev['title']} {ev['summary']}", embeddings)
-        if c is not None:
-            ids.append(ev["id"])
-            vecs.append(c)
 
     out_dir = repo / "public" / "data"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "events.json").write_text(json.dumps({
         "wave_variant": WAVE_VARIANT,
-        "generated": datetime.now(timezone.utc).date().isoformat(),
-        "glove": GLOVE_SOURCE,
+        "generated": now.date().isoformat(),
         "events": events,
     }, ensure_ascii=False, indent=0))
-    write_embeddings_binary(ids, np.stack(vecs).astype(np.float32), out_dir / "events.bin")
-    print(f"wrote {len(events)} events, {len(ids)} vectors", file=sys.stderr)
+    print(f"wrote {len(events)} events (vectors built by the oracle build)", file=sys.stderr)
 
 
 if __name__ == "__main__":

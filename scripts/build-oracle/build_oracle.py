@@ -77,12 +77,18 @@ def main() -> None:
     events = json.loads((repo / "public/data/events.json").read_text())["events"]
     event_tokens = {t for e in events for t in _TOKEN.findall(f"{e['title']} {e['summary']}".lower())}
 
-    # seed words + glyphs per hexagram; collect the required-word set the GloVe pass keeps
+    # seed words + glyphs per hexagram; collect the required-word set the GloVe pass keeps.
+    # Uses judgment+lines+keywords when present (Task 5 shape); gracefully falls back to
+    # the old shape (judgment/image, no lines/keywords).
     for h in src:
-        h["seedWords"] = seed_words(h["name"], h["judgment"], h["image"])
+        text = " ".join([h["name"], h.get("judgment", ""), *h.get("lines", [])])
+        kw = [w.lower() for w in h.get("keywords", [])]
+        h["seedWords"] = list(dict.fromkeys(kw + seed_words("", text, "", cap=24)))
         h["glyph"] = chr(0x4DC0 + h["n"] - 1)
     seeds = {w for h in src for w in h["seedWords"]}
-    required = seeds | event_tokens
+    WAVE_VOCAB = {"ingression", "novelty", "habit", "entrenchment", "dissolving",
+                  "returning", "deepening", "threshold", "culmination", "transition"}
+    required = seeds | event_tokens | WAVE_VOCAB
 
     # one streaming pass over GloVe: keep required words + top-frequency fill (cap ~10k)
     DIM, CAP = 300, 10000
@@ -96,7 +102,7 @@ def main() -> None:
                 emb[w] = np.asarray(parts[1:1 + DIM], dtype=np.float32)
                 if w not in required:
                     frequent.append(w)
-    vocab = [w for w in assemble_vocab(seeds, event_tokens, frequent, CAP) if w in emb]
+    vocab = [w for w in assemble_vocab(seeds | WAVE_VOCAB, event_tokens, frequent, CAP) if w in emb]
 
     out = repo / "public/data"
     out.mkdir(parents=True, exist_ok=True)
@@ -139,10 +145,11 @@ def main() -> None:
     cents = np.stack([centered_centroid(h["seedWords"]) for h in ordered]).astype(np.float32)
     write_embeddings_binary([str(h["n"]) for h in ordered], cents, out / "hexagrams_64.bin")
     (out / "hexagrams.json").write_text(json.dumps({
-        "wave_variant": WAVE_VARIANT,
+        "wave_variant": WAVE_VARIANT, "glove": "glove-6B-300d",
+        "generated": __import__("datetime").date.today().isoformat(),
         "hexagrams": [{"n": h["n"], "glyph": h["glyph"], "name": h["name"],
-                       "judgment": h["judgment"], "image": h["image"], "seedWords": h["seedWords"]}
-                      for h in ordered],
+                       "judgment": h.get("judgment", ""), "lines": h.get("lines", []),
+                       "seedWords": h["seedWords"]} for h in ordered],
     }, ensure_ascii=False, indent=0))
     print(f"wrote {len(vocab)} vocab words, 64 hexagrams", file=sys.stderr)
 
