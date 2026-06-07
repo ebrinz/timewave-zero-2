@@ -18,7 +18,7 @@ export function ChartDock() {
   const depth = zoomDepth(view);
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
+    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px] sm:min-h-0 sm:overflow-y-auto">
       {/* Stat readouts: a row on phones, a column in the desktop side-dock. */}
       <div className="flex flex-row sm:flex-col gap-4 sm:gap-2">
         <div>
