@@ -50,3 +50,10 @@ export function parseView(p: URLSearchParams): ParseResult {
   }
   return { view: DEFAULT_VIEW, error: null };
 }
+
+/** The default "open on now" view: today centered at the default span. */
+export function homeView(): Viewport {
+  const span = DEFAULT_VIEW.tLeft - DEFAULT_VIEW.tRight;
+  const c = dateToT(new Date());
+  return clamp({ tLeft: c + span / 2, tRight: c - span / 2 });
+}

@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { clamp, type Viewport } from '@/chart/viewport';
 import type { OverlayLayer } from '@/chart/layers/types';
-import { DEFAULT_VIEW, serializeView, parseView } from '@/state/urlSync';
+import { DEFAULT_VIEW, serializeView, parseView, homeView } from '@/state/urlSync';
 
 type Hover = { t: number; x: number; y: number; novelty: number } | null;
 interface ChartCtx {
@@ -32,12 +32,17 @@ export function ChartProvider({ layers, children }: { layers: OverlayLayer[]; ch
   // The URL is an external system we synchronize FROM on mount, so this
   // setState-in-effect is intentional (not the "derived state" anti-pattern).
   useEffect(() => {
-    const parsed = parseView(new URLSearchParams(window.location.search));
-    if (parsed.error) console.warn(parsed.error);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from URL (external system) once on mount
-    setViewRaw(parsed.view);
+    const read = () => {
+      const s = new URLSearchParams(window.location.search);
+      const hasParams = s.has('l') || s.has('r') || s.has('d');
+      const parsed = parseView(s);
+      if (parsed.error) console.warn(parsed.error);
+      return hasParams ? parsed.view : homeView();
+    };
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from URL/now (external) once on mount
+    setViewRaw(read());
     didHydrate.current = true;
-    const onPop = () => setViewRaw(parseView(new URLSearchParams(window.location.search)).view);
+    const onPop = () => setViewRaw(read());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
