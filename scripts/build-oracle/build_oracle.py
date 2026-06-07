@@ -52,7 +52,7 @@ def centroid(words: List[str], embeddings: Dict[str, np.ndarray]) -> np.ndarray:
     """L2-normalized mean of in-vocab word vectors (OOV words skipped)."""
     vecs = [embeddings[w] for w in words if w in embeddings]
     if not vecs:
-        dim = len(next(iter(embeddings.values())))
+        dim = len(next(iter(embeddings.values()))) if embeddings else 300
         return np.zeros(dim, dtype=np.float32)
     mean = np.mean(np.stack(vecs), axis=0).astype(np.float32)
     n = float(np.linalg.norm(mean))

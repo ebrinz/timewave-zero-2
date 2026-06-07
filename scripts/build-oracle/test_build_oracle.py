@@ -27,3 +27,8 @@ def test_centroid_averages_and_normalizes():
     c = centroid(["thunder", "rain", "missingword"], EMB)
     assert abs(float(np.linalg.norm(c)) - 1.0) < 1e-6
     assert abs(c[0] - c[1]) < 1e-6
+
+
+def test_centroid_empty_embeddings_returns_zero_vector():
+    c = centroid(["anything"], {})
+    assert c.shape == (300,) and not c.any()
