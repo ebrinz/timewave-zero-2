@@ -34,10 +34,14 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
-  // Static export uses trailingSlash: a navigate to '/x/' maps to precached '/x/index.html'.
-  const cacheKey = req.mode === 'navigate'
-    ? new Request(req.url.replace(/\/$/, '') + '/index.html')
-    : req;
+  // Static export uses trailingSlash: a navigate to '/x/?q' maps to precached
+  // '/x/index.html' (strip the query, then map the trailing slash to index.html).
+  let cacheKey = req;
+  if (req.mode === 'navigate') {
+    const u = new URL(req.url);
+    u.search = '';
+    cacheKey = new Request(u.href.replace(/\/$/, '') + '/index.html');
+  }
   e.respondWith(
     caches.match(cacheKey).then(async (hit) => {
       if (hit) return hit;
