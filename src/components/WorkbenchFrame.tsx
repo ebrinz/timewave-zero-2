@@ -20,7 +20,7 @@ export function WorkbenchFrame({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   return (
-    <div className="flex flex-col h-screen wb-out" style={{ background: 'var(--wb-blue)' }}>
+    <div className="flex flex-col h-dvh wb-out" style={{ background: 'var(--wb-blue)' }}>
       <Hotkeys onHelp={() => router.push('/help')} onAbout={() => router.push('/about')} onChart={() => router.push('/')} />
       <header className="wb-title flex justify-between items-center gap-2 px-2">
         <span className="phosphor-glow font-bold truncate">

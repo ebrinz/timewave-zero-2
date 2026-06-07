@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { WorkbenchFrame } from '@/components/WorkbenchFrame';
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 
 const vt323 = localFont({
   src: '../../public/fonts/VT323.ttf',
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
     description: 'Explore the Sheliak timewave — McKenna’s novelty theory as an interactive DOS-style chart.',
     images: ['/og/chart.png'],
   },
+  icons: { apple: '/icons/apple-touch-180.png' },
 };
 
 export const viewport: Viewport = {
@@ -32,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={vt323.variable}>
       <body>
         <WorkbenchFrame>{children}</WorkbenchFrame>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

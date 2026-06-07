@@ -2,7 +2,6 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { ChartProvider } from '@/state/ChartProvider';
 import { ChartShell } from '@/components/ChartShell';
-import { HexagramBgLayer } from '@/chart/layers/HexagramBgLayer';
 import { GridLayer } from '@/chart/layers/GridLayer';
 import { WaveLayer } from '@/chart/layers/WaveLayer';
 import { MarkersLayer } from '@/chart/layers/MarkersLayer';
@@ -18,7 +17,7 @@ export function ChartIsland() {
   // Rebuilding the array when events arrive gives ChartCanvas a new `layers`
   // reference, so it repaints with the loaded events (later layer = on top).
   const layers = useMemo(
-    () => [HexagramBgLayer, GridLayer, WaveLayer, MarkersLayer, createEventsLayer(events)],
+    () => [GridLayer, WaveLayer, MarkersLayer, createEventsLayer(events)],
     [events],
   );
 

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { activeHexagram } from '@/chart/oracle/hexagram';
+import { activeHexagramAt } from '@/chart/oracle/hexagram';
 import { wordCloud, resonantEvents, composeReading, type HexagramsData } from '@/chart/oracle/reading';
 import { sliceVector, type VectorSet } from '@/chart/oracle/quant';
 import { loadHexagrams, loadGlove, loadHexVectors, loadEventVectors } from '@/state/loadOracle';
@@ -14,7 +14,7 @@ import type { EventsData } from '@/chart/events';
  * vector bins load). Reads the same `view` as the chart, so it updates on pan/zoom.
  */
 export function OraclePanel() {
-  const { view } = useChart();
+  const { view, hover } = useChart();
   const [hexData, setHexData] = useState<HexagramsData | null>(null);
   const [glove, setGlove] = useState<VectorSet | null>(null);
   const [hexVecs, setHexVecs] = useState<VectorSet | null>(null);
@@ -27,7 +27,10 @@ export function OraclePanel() {
     loadEventVectors().then(setEventVecs); loadEvents().then(setEvents);
   }, []);
 
-  const active = useMemo(() => activeHexagram(view), [view]);
+  const active = useMemo(() => {
+    const t = hover ? hover.t : (view.tLeft + view.tRight) / 2;
+    return activeHexagramAt(t, view.tLeft - view.tRight);
+  }, [view, hover]);
   const hex = hexData?.hexagrams[active.ordinal] ?? null;
   const hexVec = useMemo(
     () => (hexVecs ? sliceVector(hexVecs, active.ordinal) : null),

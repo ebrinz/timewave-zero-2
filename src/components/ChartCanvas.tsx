@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
 import { xToT, zoomTo, panBy, type Dims, type Viewport } from '@/chart/viewport';
 import { novelty } from '@/chart/timewave';
+import { tToDate, formatInstant } from '@/chart/time';
+import { activeHexagramAt } from '@/chart/oracle/hexagram';
 import { distance, midpoint, isTap, type Pt } from '@/chart/gestures';
 
 export function ChartCanvas() {
@@ -56,6 +58,23 @@ export function ChartCanvas() {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, dims.w, dims.h);
     const raf = requestAnimationFrame(() => {
+      // Faint watermark of the hexagram governing the selected time (the hovered
+      // point, else the view centre), with that instant labelled beneath it.
+      const span = view.tLeft - view.tRight;
+      const selT = hover ? hover.t : (view.tLeft + view.tRight) / 2;
+      const g = Math.min(dims.w, dims.h) * 0.7;
+      const cx = dims.w / 2, cy = dims.h / 2;
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,136,0,0.16)';
+      ctx.font = `${g}px serif`;
+      ctx.fillText(activeHexagramAt(selT, span).glyph, cx, cy);
+      ctx.fillStyle = 'rgba(255,136,0,0.55)';
+      ctx.font = '13px "VT323", ui-monospace, monospace';
+      ctx.fillText(formatInstant(tToDate(selT), span), cx, cy + g * 0.42 + 6);
+      ctx.restore();
+
       for (const l of layers) {
         if (l.visible(view)) l.draw(ctx, view, dims, (l as { data?: unknown }).data);
       }
