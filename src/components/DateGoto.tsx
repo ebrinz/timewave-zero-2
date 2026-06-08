@@ -4,13 +4,14 @@ import { useChart } from '@/state/ChartProvider';
 import { parseFuzzyDate, dateToT } from '@/chart/time';
 
 export function DateGoto({ onClose }: { onClose: () => void }) {
-  const { view, setView } = useChart();
+  const { view, setView, setHover } = useChart();
   const [text, setText] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const span = view.tLeft - view.tRight;
   const go = () => {
     try {
       const c = dateToT(parseFuzzyDate(text));
+      setHover(null); // oracle tracks the jumped-to centre
       setView({ tLeft: c + span / 2, tRight: c - span / 2 });
       onClose();
     } catch (e) {

@@ -11,11 +11,13 @@ import { DateGoto } from './DateGoto';
  * (how far into the fractal you've dived), zoom presets, and GOTO.
  */
 export function ChartDock() {
-  const { view, setView } = useChart();
+  const { view, setView, setHover } = useChart();
   const [gotoOpen, setGotoOpen] = useState(false);
   const center = (view.tLeft + view.tRight) / 2;
   const span = view.tLeft - view.tRight;
   const depth = zoomDepth(view);
+  // Navigate, dropping any sticky hover so the oracle tracks the new view centre.
+  const nav = (v: Parameters<typeof setView>[0]) => { setHover(null); setView(v); };
 
   return (
     <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
@@ -50,7 +52,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out flex-1 font-bold"
             aria-label="Pan to earlier time"
-            onClick={() => setView(panBy(view, span * 0.3))}
+            onClick={() => nav(panBy(view, span * 0.3))}
           >
             ◀
           </button>
@@ -58,7 +60,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out flex-1 font-bold whitespace-nowrap"
             title="Jump to the present moment"
-            onClick={() => { const t = dateToT(new Date()); setView({ tLeft: t + span / 2, tRight: t - span / 2 }); }}
+            onClick={() => { const t = dateToT(new Date()); nav({ tLeft: t + span / 2, tRight: t - span / 2 }); }}
           >
             NOW
           </button>
@@ -66,7 +68,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out flex-1 font-bold"
             aria-label="Pan to later time"
-            onClick={() => setView(panBy(view, -span * 0.3))}
+            onClick={() => nav(panBy(view, -span * 0.3))}
           >
             ▶
           </button>
@@ -82,7 +84,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out flex-1 font-bold"
             aria-label="Zoom out"
-            onClick={() => setView(zoomTo(view, center, 1.25))}
+            onClick={() => nav(zoomTo(view, center, 1.25))}
           >
             −
           </button>
@@ -90,7 +92,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out wb-btn--on flex-1 font-bold whitespace-nowrap"
             title="Zoom all the way out to the full timewave"
-            onClick={() => setView({ tLeft: SPAN_BOUNDS.max / 2, tRight: -SPAN_BOUNDS.max / 2 })}
+            onClick={() => nav({ tLeft: SPAN_BOUNDS.max / 2, tRight: -SPAN_BOUNDS.max / 2 })}
           >
             ⊟ FULL
           </button>
@@ -98,7 +100,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out flex-1 font-bold"
             aria-label="Zoom in"
-            onClick={() => setView(zoomTo(view, center, 0.8))}
+            onClick={() => nav(zoomTo(view, center, 0.8))}
           >
             +
           </button>
@@ -111,7 +113,7 @@ export function ChartDock() {
               type="button"
               className="wb-btn wb-out flex-1 font-bold"
               aria-label="Zoom out"
-              onClick={() => setView(zoomTo(view, center, 1.25))}
+              onClick={() => nav(zoomTo(view, center, 1.25))}
             >
               −
             </button>
@@ -119,7 +121,7 @@ export function ChartDock() {
               type="button"
               className="wb-btn wb-out flex-1 font-bold"
               aria-label="Zoom in"
-              onClick={() => setView(zoomTo(view, center, 0.8))}
+              onClick={() => nav(zoomTo(view, center, 0.8))}
             >
               +
             </button>
@@ -128,7 +130,7 @@ export function ChartDock() {
             type="button"
             className="wb-btn wb-out wb-btn--on text-left font-bold"
             title="Zoom all the way out to the full timewave"
-            onClick={() => setView({ tLeft: SPAN_BOUNDS.max / 2, tRight: -SPAN_BOUNDS.max / 2 })}
+            onClick={() => nav({ tLeft: SPAN_BOUNDS.max / 2, tRight: -SPAN_BOUNDS.max / 2 })}
           >
             ⊟ FULL WAVE
           </button>

@@ -9,6 +9,9 @@ import { distance, midpoint, isTap, type Pt } from '@/chart/gestures';
 
 export function ChartCanvas() {
   const { view, setView, hover, setHover, layers } = useChart();
+  // Latest setHover for the imperative wheel listener (attached once, below).
+  const setHoverRef = useRef(setHover);
+  useEffect(() => { setHoverRef.current = setHover; });
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dims, setDims] = useState<Dims>({ w: 800, h: 480 });
@@ -98,6 +101,7 @@ export function ChartCanvas() {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const v = viewRef.current, w = dimsRef.current.w;
+      setHoverRef.current(null); // navigation → oracle follows the view centre
       setView(zoomTo(v, xToT(e.offsetX, v, w), e.deltaY > 0 ? 1.1 : 0.9));
     };
     c.addEventListener('wheel', onWheel, { passive: false });
@@ -110,6 +114,8 @@ export function ChartCanvas() {
     // gesture. Tolerate environments where the pointer isn't capturable.
     try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* no-op */ }
     pointers.current.set(e.pointerId, ptOf(e));
+    // Drop any sticky readout: a drag now tracks the centre; a tap re-selects on release.
+    setHover(null);
     if (pointers.current.size >= 2) {
       const [a, b] = [...pointers.current.values()];
       gesture.current = { kind: 'pinch', lastDist: distance(a, b) };
