@@ -87,6 +87,9 @@ html, body {
 /* Small uppercase field label. */
 .wb-label { font-size: 11px; letter-spacing: 1px; color: var(--wb-blue-d); font-weight: bold; }
 
+/* Traditional I Ching stanza (Legge) — set apart from our VT323 gloss. */
+.oracle-trad { font-family: ui-serif, Georgia, "Times New Roman", serif; }
+
 /* --- Guru Meditation (easter-egg crash requester) --- */
 .guru {
   background: #000; color: #ff3b3b;
