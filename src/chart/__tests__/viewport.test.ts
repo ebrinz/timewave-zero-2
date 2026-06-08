@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tToX, xToT, zoomTo, panBy, clamp, PRESETS, LIMITS, type Viewport } from '@/chart/viewport';
+import { tToX, xToT, zoomTo, panBy, centerOn, clamp, PRESETS, LIMITS, type Viewport } from '@/chart/viewport';
 
 const view: Viewport = { tLeft: 40000, tRight: -4000 };   // past left, future right
 const W = 1000;
@@ -37,6 +37,11 @@ describe('viewport math', () => {
     const p = panBy(view, 1000);
     expect(p.tLeft - view.tLeft).toBeCloseTo(1000, 6);
     expect(p.tRight - view.tRight).toBeCloseTo(1000, 6);
+  });
+  it('centerOn places t at the centre and preserves the span', () => {
+    const c = centerOn(view, 12345);
+    expect((c.tLeft + c.tRight) / 2).toBeCloseTo(12345, 6);
+    expect(c.tLeft - c.tRight).toBeCloseTo(view.tLeft - view.tRight, 6);
   });
   it('exposes the documented zoom presets', () => {
     expect(PRESETS.map(p => p.label)).toEqual(['1y','10y','100y','1ky','10ky']);

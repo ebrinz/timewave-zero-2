@@ -60,3 +60,7 @@ export function zoomTo(v: Viewport, anchorT: number, factor: number): Viewport {
 
 export const panBy = (v: Viewport, deltaT: number): Viewport =>
   clamp({ tLeft: v.tLeft + deltaT, tRight: v.tRight + deltaT });
+
+/** Translate the viewport so time `t` sits at the centre (span unchanged). */
+export const centerOn = (v: Viewport, t: number): Viewport =>
+  panBy(v, t - (v.tLeft + v.tRight) / 2);

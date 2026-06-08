@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
 import { xToT, zoomTo, panBy, type Dims, type Viewport } from '@/chart/viewport';
 import { novelty } from '@/chart/timewave';
@@ -32,6 +32,30 @@ export function ChartCanvas() {
   const viewRef = useRef(view);
   const dimsRef = useRef(dims);
   useEffect(() => { viewRef.current = view; dimsRef.current = dims; });
+
+  // Eased pan that slides a chosen time to the chart centre. Selection == centre,
+  // so the oracle (which reads the centre) settles on exactly what you picked.
+  const animRef = useRef<number | null>(null);
+  const cancelAnim = useCallback(() => {
+    if (animRef.current !== null) { cancelAnimationFrame(animRef.current); animRef.current = null; }
+  }, []);
+  const animateCenterTo = useCallback((targetT: number) => {
+    cancelAnim();
+    const start = viewRef.current;
+    const delta = targetT - (start.tLeft + start.tRight) / 2;
+    if (delta === 0) return;
+    const DURATION = 420; // ms
+    const ease = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2); // easeInOutCubic
+    let t0: number | null = null;
+    const step = (ts: number) => {
+      if (t0 === null) t0 = ts;
+      const p = Math.min(1, (ts - t0) / DURATION);
+      setView(panBy(start, delta * ease(p)));
+      animRef.current = p < 1 ? requestAnimationFrame(step) : null;
+    };
+    animRef.current = requestAnimationFrame(step);
+  }, [setView, cancelAnim]);
+  useEffect(() => cancelAnim, [cancelAnim]); // stop any in-flight slide on unmount
 
   // Responsive sizing via ResizeObserver (client-only).
   useEffect(() => {
@@ -100,13 +124,14 @@ export function ChartCanvas() {
     if (!c) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
+      cancelAnim();              // a manual zoom interrupts any in-flight slide
       const v = viewRef.current, w = dimsRef.current.w;
       setHoverRef.current(null); // navigation → oracle follows the view centre
       setView(zoomTo(v, xToT(e.offsetX, v, w), e.deltaY > 0 ? 1.1 : 0.9));
     };
     c.addEventListener('wheel', onWheel, { passive: false });
     return () => c.removeEventListener('wheel', onWheel);
-  }, [setView]);
+  }, [setView, cancelAnim]);
   const ptOf = (e: React.PointerEvent): Pt => ({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -114,7 +139,8 @@ export function ChartCanvas() {
     // gesture. Tolerate environments where the pointer isn't capturable.
     try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* no-op */ }
     pointers.current.set(e.pointerId, ptOf(e));
-    // Drop any sticky readout: a drag now tracks the centre; a tap re-selects on release.
+    cancelAnim();         // a new touch interrupts any in-flight slide
+    // Drop any sticky readout: a drag now tracks the centre; a tap slides to centre.
     setHover(null);
     if (pointers.current.size >= 2) {
       const [a, b] = [...pointers.current.values()];
@@ -163,11 +189,11 @@ export function ChartCanvas() {
     const p = ptOf(e);
     pointers.current.delete(e.pointerId);
 
-    // A travel-free one-finger release is a tap → drop a persistent readout.
+    // A travel-free one-finger release is a tap → slide that instant to the
+    // centre (which is the selection the oracle reads).
     if (g?.kind === 'pan' && isTap(g.moved)) {
-      const v = viewRef.current;
-      const t = xToT(p.x, v, dimsRef.current.w);
-      setHover({ t, x: p.x, y: p.y, novelty: novelty(t) });
+      const t = xToT(p.x, viewRef.current, dimsRef.current.w);
+      animateCenterTo(t);
     }
 
     // Re-derive the gesture from whatever fingers remain down.
