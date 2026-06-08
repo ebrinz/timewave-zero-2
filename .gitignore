@@ -38,3 +38,6 @@ __pycache__/
 
 # raw GloVe (oracle build input; never committed)
 scripts/build-oracle/glove.6B*
+
+# Legge fetch cache (source_legge.py); parsed output is hexagrams_source.json
+scripts/build-oracle/legge.html
