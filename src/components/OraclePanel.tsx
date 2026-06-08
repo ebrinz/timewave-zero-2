@@ -51,36 +51,44 @@ export function OraclePanel() {
   }, [hexVec, eventVecs, events]);
   const ws = useMemo(() => waveState(hover ? hover.t : (view.tLeft + view.tRight) / 2, view), [view, hover]);
 
+  // Fixed height + an internal scroll region so the panel's footprint never
+  // changes with the length of the Legge stanza — the chart above stays put.
   return (
-    <div className="wb-panel wb-in w-full p-2 flex flex-col items-center gap-1 text-[13px]">
-      <div className="wb-label">Oracle</div>
-      <span className="text-5xl sm:text-6xl leading-none" aria-hidden="true">{active.glyph}</span>
-      <div className="font-bold text-base tabular-nums">{active.kingWen} · {hex?.name ?? '…'} — line {active.line}</div>
-      {hex && (
-        <div className="oracle-trad text-center max-w-prose leading-snug text-[14px]">
-          <div>“{hex.judgment}”</div>
-          {hex.lines[active.line - 1] && <div className="mt-1 italic">“{hex.lines[active.line - 1]}”</div>}
+    <div className="wb-panel wb-in w-full p-2 flex flex-col items-center gap-1 text-[13px] h-[184px] sm:h-[208px] overflow-hidden">
+      <div className="flex items-center justify-center gap-3 shrink-0">
+        <span className="text-4xl leading-none" aria-hidden="true">{active.glyph}</span>
+        <div className="text-left">
+          <div className="wb-label">Oracle</div>
+          <div className="font-bold text-base tabular-nums">{active.kingWen} · {hex?.name ?? '…'} — line {active.line}</div>
         </div>
-      )}
-      <div className="text-center max-w-prose leading-tight" style={{ color: 'var(--wb-orange)' }}>
-        {composeReading(active.line, ws, cloud)} <span className="whitespace-nowrap">{waveBadge(ws)}</span>
       </div>
-      {cloud.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-0.5 text-[12px]" style={{ color: 'var(--wb-blue-d)' }}>
-          {cloud.map((w) => <span key={w}>{w}</span>)}
+      <div className="flex-1 min-h-0 w-full overflow-y-auto flex flex-col items-center gap-1">
+        {hex && (
+          <div className="oracle-trad text-center max-w-prose leading-snug text-[14px]">
+            <div>“{hex.judgment}”</div>
+            {hex.lines[active.line - 1] && <div className="mt-1 italic">“{hex.lines[active.line - 1]}”</div>}
+          </div>
+        )}
+        <div className="text-center max-w-prose leading-tight" style={{ color: 'var(--wb-orange)' }}>
+          {composeReading(active.line, ws, cloud)} <span className="whitespace-nowrap">{waveBadge(ws)}</span>
         </div>
-      )}
-      {echoes.length > 0 && (
-        <div className="text-[11px] text-center max-w-prose">
-          <span className="wb-label">Echoes </span>
-          {echoes.map((e, i) => (
-            <span key={e.id}>
-              {i > 0 && ' · '}
-              <a href={e.url} target="_blank" rel="noreferrer" className="underline">{e.title}</a> ({e.year})
-            </span>
-          ))}
-        </div>
-      )}
+        {cloud.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-x-3 gap-y-0.5 text-[12px]" style={{ color: 'var(--wb-blue-d)' }}>
+            {cloud.map((w) => <span key={w}>{w}</span>)}
+          </div>
+        )}
+        {echoes.length > 0 && (
+          <div className="text-[11px] text-center max-w-prose">
+            <span className="wb-label">Echoes </span>
+            {echoes.map((e, i) => (
+              <span key={e.id}>
+                {i > 0 && ' · '}
+                <a href={e.url} target="_blank" rel="noreferrer" className="underline">{e.title}</a> ({e.year})
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
