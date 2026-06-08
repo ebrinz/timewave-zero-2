@@ -16,13 +16,19 @@ const WEAK = new Set([
   'who', 'can', 'may', 'more', 'most', 'than', 'too', 'very', 'just', 'about', 'into',
   'over', 'after', 'before', 'these', 'those', 'here', 'there', 'now', 'also', 'only',
   'back', 'come', 'comes', 'coming', 'bring', 'brings', 'way', 'ways', 'because',
+  'do', 'does', 'did', 'done', 'doing', 'has', 'have', 'had', 'been', 'being', 'were',
+  'him', 'himself', 'me', 'my', 'i', 'us', 'our', 'their', 'thy', 'thee', 'thou',
+  'your', 'yours', 'mine', 'ours', 'theirs', 'hers', 'himself', 'herself', 'itself',
+  'even', 'own', 'upon', 'must', 'shall', 'thus', 'yet', 'while', 'where', 'whom',
+  'whose', 'such', 'much', 'every', 'some', 'any', 'each', 'both', 'other', 'same',
 ]);
 
-/** Nearest GloVe words to the hexagram centroid, weak words filtered out. */
+/** Nearest GloVe words to the hexagram centroid, weak/function words and
+ *  non-alphabetic tokens (numbers, contraction fragments like "n't") filtered out. */
 export function wordCloud(hexVec: Float32Array, glove: VectorSet, k: number): string[] {
   return cosineTopK(hexVec, glove, Math.max(k * 4, 32))
     .map((e) => e.word)
-    .filter((w) => !WEAK.has(w))
+    .filter((w) => /^[a-z]{2,}$/.test(w) && !WEAK.has(w))
     .slice(0, k);
 }
 

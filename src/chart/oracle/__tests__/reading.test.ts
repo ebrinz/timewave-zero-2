@@ -22,6 +22,11 @@ describe('reading', () => {
     const glove = bin(['storm', 'the', 'rain', 'and'], [[1, 0.1], [0.95, 0], [0.9, 0.1], [0.85, 0]]);
     expect(wordCloud(hexVec, glove, 2)).toEqual(['storm', 'rain']);
   });
+  it('wordCloud drops contraction fragments and non-alpha tokens', () => {
+    const glove = bin(["n't", 'thunder', 'does', '42', 'rain', 'him'],
+      [[1, 0.01], [0.98, 0], [0.96, 0], [0.94, 0], [0.92, 0], [0.9, 0]]);
+    expect(wordCloud(hexVec, glove, 2)).toEqual(['thunder', 'rain']);
+  });
   it('resonantEvents returns nearest event ids', () => {
     expect(resonantEvents(hexVec, bin(['Q1', 'Q2'], [[0.9, 0], [0, 1]]), 1)[0]).toBe('Q1');
   });
