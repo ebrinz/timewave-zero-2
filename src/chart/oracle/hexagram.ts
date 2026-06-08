@@ -1,8 +1,8 @@
 import type { Viewport } from '@/chart/viewport';
 
 /** The hexagram governing a viewport: its King Wen ordinal (0..63), number (1..64),
- *  and Unicode glyph (䷀..䷿). */
-export interface ActiveHexagram { ordinal: number; kingWen: number; glyph: string; }
+ *  Unicode glyph (䷀..䷿), and active changing line (1..6, bottom = 1). */
+export interface ActiveHexagram { ordinal: number; kingWen: number; glyph: string; line: number; }
 
 const log64 = (n: number): number => Math.log(n) / Math.log(64);
 
@@ -16,7 +16,8 @@ export function activeHexagramAt(t: number, span: number): ActiveHexagram {
   const s = Math.max(0, Math.round(log64(384 / span)));
   const index = ((Math.floor(x * 64 ** s) % 384) + 384) % 384;
   const ordinal = Math.floor(index / 6);
-  return { ordinal, kingWen: ordinal + 1, glyph: String.fromCodePoint(0x4dc0 + ordinal) };
+  const line = (index % 6) + 1;
+  return { ordinal, kingWen: ordinal + 1, glyph: String.fromCodePoint(0x4dc0 + ordinal), line };
 }
 
 /** The hexagram governing a viewport (its center time). */

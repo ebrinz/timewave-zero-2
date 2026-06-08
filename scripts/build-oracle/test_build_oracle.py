@@ -32,3 +32,9 @@ def test_centroid_averages_and_normalizes():
 def test_centroid_empty_embeddings_returns_zero_vector():
     c = centroid(["anything"], {})
     assert c.shape == (300,) and not c.any()
+
+
+def test_seed_words_from_judgment_and_lines_text():
+    sw = seed_words("Deliverance", "Thunder and rain bring release.", "")
+    assert "thunder" in sw and "rain" in sw and "release" in sw
+    assert "and" not in sw

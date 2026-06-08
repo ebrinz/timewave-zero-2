@@ -5,15 +5,15 @@ import type { Viewport } from '@/chart/viewport';
 const v = (tLeft: number, tRight: number): Viewport => ({ tLeft, tRight });
 
 describe('activeHexagram', () => {
-  it('center 0 → hexagram 1 (ordinal 0, glyph ䷀)', () => {
-    const h = activeHexagram(v(200, -200));
-    expect(h).toEqual({ ordinal: 0, kingWen: 1, glyph: '䷀' });
+  it('center 0 → hexagram 1, line 1 (glyph ䷀)', () => {
+    expect(activeHexagram(v(200, -200))).toEqual({ ordinal: 0, kingWen: 1, glyph: '䷀', line: 1 });
   });
 
-  it('wide span uses scale 0: index = floor(x) mod 384', () => {
+  it('line = index % 6 + 1', () => {
+    // center 205, span 390 → s=0, index 205, ordinal 34, line 205%6+1 = 2
     const h = activeHexagram(v(400, 10));
     expect(h.ordinal).toBe(34);
-    expect(h.kingWen).toBe(35);
+    expect(h.line).toBe(2);
   });
 
   it('mod-384 wrap at scale 0', () => {
