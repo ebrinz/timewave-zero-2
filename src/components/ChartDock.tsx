@@ -5,6 +5,8 @@ import { zoomDepth, SPAN_BOUNDS, zoomTo, panBy } from '@/chart/viewport';
 import { formatSpan, dateToT } from '@/chart/time';
 import { novelty } from '@/chart/timewave';
 import { DateGoto } from './DateGoto';
+import { useBirthwave } from '@/state/BirthwaveProvider';
+import { BirthdatePicker } from './BirthdatePicker';
 
 /**
  * The beveled side dock for Layout C: span readout, a log-scale depth gauge
@@ -13,6 +15,8 @@ import { DateGoto } from './DateGoto';
 export function ChartDock() {
   const { view, setView, setHover } = useChart();
   const [gotoOpen, setGotoOpen] = useState(false);
+  const { birthday, birthwave, background, setBirthday, setBirthwave, setBackground } = useBirthwave();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const center = (view.tLeft + view.tRight) / 2;
   const span = view.tLeft - view.tRight;
   const depth = zoomDepth(view);
@@ -137,11 +141,47 @@ export function ChartDock() {
         </div>
       </div>
 
+      <hr className="border-t-2 border-black/40 my-0.5 w-full" />
+
+      <div className="flex flex-col gap-1">
+        <div className="wb-label">Birthwave</div>
+        <button
+          type="button"
+          className={`wb-btn wb-out w-full font-bold ${birthwave ? 'wb-btn--on' : ''}`}
+          aria-pressed={birthwave}
+          title="Re-anchor the wave to your birthday"
+          onClick={() => { if (!birthday) setPickerOpen(true); else setBirthwave(!birthwave); }}
+        >
+          BIRTHWAVE {birthwave ? 'ON' : 'OFF'}
+        </button>
+        <button type="button" className="wb-btn wb-out w-full text-[11px]" onClick={() => setPickerOpen(true)}>
+          BIRTHDATE… {birthday ? `(${birthday})` : ''}
+        </button>
+        <button
+          type="button"
+          className={`wb-btn wb-out w-full text-[11px] ${background ? 'wb-btn--on' : ''}`}
+          aria-pressed={background}
+          disabled={!birthwave}
+          style={{ opacity: birthwave ? 1 : 0.5 }}
+          title="Show the original 2012 wave behind the birthwave"
+          onClick={() => setBackground(!background)}
+        >
+          2012 WAVE {background ? 'ON' : 'OFF'}
+        </button>
+      </div>
+
       <button type="button" className="wb-btn wb-out w-full mt-1" onClick={() => setGotoOpen(true)}>
         GOTO…
       </button>
 
       {gotoOpen && <DateGoto onClose={() => setGotoOpen(false)} />}
+      {pickerOpen && (
+        <BirthdatePicker
+          initial={birthday}
+          onSet={(iso) => { setBirthday(iso); setPickerOpen(false); }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }

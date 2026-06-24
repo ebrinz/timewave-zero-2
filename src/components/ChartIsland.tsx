@@ -2,6 +2,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { ChartProvider } from '@/state/ChartProvider';
 import { ChartShell } from '@/components/ChartShell';
+import { BirthwaveProvider } from '@/state/BirthwaveProvider';
 import { GridLayer } from '@/chart/layers/GridLayer';
 import { WaveLayer } from '@/chart/layers/WaveLayer';
 import { MarkersLayer } from '@/chart/layers/MarkersLayer';
@@ -22,10 +23,12 @@ export function ChartIsland() {
   );
 
   return (
-    <Suspense fallback={null}>
-      <ChartProvider layers={layers}>
-        <ChartShell />
-      </ChartProvider>
-    </Suspense>
+    <BirthwaveProvider>
+      <Suspense fallback={null}>
+        <ChartProvider layers={layers}>
+          <ChartShell />
+        </ChartProvider>
+      </Suspense>
+    </BirthwaveProvider>
   );
 }
