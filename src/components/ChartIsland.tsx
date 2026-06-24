@@ -6,7 +6,7 @@ import { BirthwaveProvider } from '@/state/BirthwaveProvider';
 import { useBirthwave } from '@/state/BirthwaveProvider';
 import { GridLayer } from '@/chart/layers/GridLayer';
 import { createWaveLayer } from '@/chart/layers/WaveLayer';
-import { MarkersLayer } from '@/chart/layers/MarkersLayer';
+import { createMarkersLayer } from '@/chart/layers/MarkersLayer';
 import { createEventsLayer } from '@/chart/layers/EventsLayer';
 import { loadEvents } from '@/state/loadEvents';
 import type { EventsData } from '@/chart/events';
@@ -24,17 +24,17 @@ function ChartIslandInner() {
   const [events, setEvents] = useState<EventsData | null>(null);
   useEffect(() => { loadEvents().then(setEvents); }, []);
 
-  const { offset, background } = useBirthwave();
+  const { offset, background, birthday } = useBirthwave();
 
   // Rebuild when events arrive or birthwave config changes (later layer = on top).
   const layers = useMemo(
     () => [
       GridLayer,
       createWaveLayer({ offset, showBackground: background }),
-      MarkersLayer,
+      createMarkersLayer({ offset, birthday, showBackground: background }),
       createEventsLayer(events),
     ],
-    [events, offset, background],
+    [events, offset, background, birthday],
   );
 
   return (
