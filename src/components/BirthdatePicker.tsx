@@ -6,6 +6,20 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const NOW_YEAR = new Date().getUTCFullYear();
 const MIN_YEAR = 1900;
 
+// Declared at module scope (not inside render) so it keeps a stable identity and
+// satisfies react-hooks/static-components.
+function Stepper({ value, onDec, onInc, decLabel, incLabel, testid }: {
+  value: string; onDec: () => void; onInc: () => void; decLabel: string; incLabel: string; testid: string;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <button type="button" className="wb-btn wb-out font-bold" aria-label={decLabel} onClick={onDec}>◀</button>
+      <span data-testid={testid} className="wb-in bg-white text-black px-2 py-0.5 min-w-[3ch] text-center tabular-nums">{value}</span>
+      <button type="button" className="wb-btn wb-out font-bold" aria-label={incLabel} onClick={onInc}>▶</button>
+    </div>
+  );
+}
+
 export function BirthdatePicker({
   initial, onSet, onClose,
 }: { initial: string | null; onSet: (iso: string) => void; onClose: () => void }) {
@@ -20,16 +34,6 @@ export function BirthdatePicker({
   const stepD = (delta: number) => { const max = daysInMonth(y, m); setD(((d - 1 + delta + max) % max) + 1); };
 
   const set = () => { onSet(formatBirthday(new Date(Date.UTC(y, m - 1, d, 12)))); };
-
-  const Stepper = ({ value, onDec, onInc, decLabel, incLabel, testid }: {
-    value: string; onDec: () => void; onInc: () => void; decLabel: string; incLabel: string; testid: string;
-  }) => (
-    <div className="flex items-center gap-1">
-      <button type="button" className="wb-btn wb-out font-bold" aria-label={decLabel} onClick={onDec}>◀</button>
-      <span data-testid={testid} className="wb-in bg-white text-black px-2 py-0.5 min-w-[3ch] text-center tabular-nums">{value}</span>
-      <button type="button" className="wb-btn wb-out font-bold" aria-label={incLabel} onClick={onInc}>▶</button>
-    </div>
-  );
 
   return (
     <div
