@@ -8,6 +8,7 @@ import { GridLayer } from '@/chart/layers/GridLayer';
 import { createWaveLayer } from '@/chart/layers/WaveLayer';
 import { createMarkersLayer } from '@/chart/layers/MarkersLayer';
 import { createEventsLayer } from '@/chart/layers/EventsLayer';
+import { createNoveltyIndexLayer } from '@/chart/layers/NoveltyIndexLayer';
 import { loadEvents } from '@/state/loadEvents';
 import type { EventsData } from '@/chart/events';
 
@@ -33,6 +34,7 @@ function ChartIslandInner() {
       createWaveLayer({ offset, showBackground: background }),
       createMarkersLayer({ offset, birthday, showBackground: background }),
       createEventsLayer(events),
+      createNoveltyIndexLayer({ offset }),
     ],
     [events, offset, background, birthday],
   );
