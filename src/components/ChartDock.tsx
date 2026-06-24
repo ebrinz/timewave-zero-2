@@ -141,33 +141,37 @@ export function ChartDock() {
         </div>
       </div>
 
-      <hr className="border-t-2 border-black/40 my-0.5 w-full" />
+      <hr className="border-t-2 border-black/40 my-0.5 w-full hidden sm:block" />
 
       <div className="flex flex-col gap-1">
         <div className="wb-label">Birthwave</div>
-        <button
-          type="button"
-          className={`wb-btn wb-out w-full font-bold ${birthwave ? 'wb-btn--on' : ''}`}
-          aria-pressed={birthwave}
-          title="Re-anchor the wave to your birthday"
-          onClick={() => { if (!birthday) setPickerOpen(true); else setBirthwave(!birthwave); }}
-        >
-          BIRTHWAVE {birthwave ? 'ON' : 'OFF'}
-        </button>
-        <button type="button" className="wb-btn wb-out w-full text-[11px]" onClick={() => setPickerOpen(true)}>
-          BIRTHDATE… {birthday ? `(${birthday})` : ''}
-        </button>
-        <button
-          type="button"
-          className={`wb-btn wb-out w-full text-[11px] ${background ? 'wb-btn--on' : ''}`}
-          aria-pressed={background}
-          disabled={!birthwave}
-          style={{ opacity: birthwave ? 1 : 0.5 }}
-          title="Show the original 2012 wave behind the birthwave"
-          onClick={() => setBackground(!background)}
-        >
-          2012 WAVE {background ? 'ON' : 'OFF'}
-        </button>
+        {/* Buttons flow in a row on phones (like Go/Zoom) so the stacked-below
+            dock stays short; they stack in the desktop side-dock column. */}
+        <div className="flex flex-row sm:flex-col gap-1">
+          <button
+            type="button"
+            className={`wb-btn wb-out flex-1 sm:flex-none font-bold whitespace-nowrap ${birthwave ? 'wb-btn--on' : ''}`}
+            aria-pressed={birthwave}
+            title="Re-anchor the wave to your birthday"
+            onClick={() => { if (!birthday) setPickerOpen(true); else setBirthwave(!birthwave); }}
+          >
+            BIRTHWAVE {birthwave ? 'ON' : 'OFF'}
+          </button>
+          <button type="button" className="wb-btn wb-out flex-1 sm:flex-none text-[11px] whitespace-nowrap" onClick={() => setPickerOpen(true)}>
+            BIRTHDATE…<span className="hidden sm:inline">{birthday ? ` (${birthday})` : ''}</span>
+          </button>
+          <button
+            type="button"
+            className={`wb-btn wb-out flex-1 sm:flex-none text-[11px] whitespace-nowrap ${background ? 'wb-btn--on' : ''}`}
+            aria-pressed={background}
+            disabled={!birthwave}
+            style={{ opacity: birthwave ? 1 : 0.5 }}
+            title="Show the original 2012 wave behind the birthwave"
+            onClick={() => setBackground(!background)}
+          >
+            2012 WAVE {background ? 'ON' : 'OFF'}
+          </button>
+        </div>
       </div>
 
       <button type="button" className="wb-btn wb-out w-full mt-1" onClick={() => setGotoOpen(true)}>
