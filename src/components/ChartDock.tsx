@@ -24,7 +24,7 @@ export function ChartDock() {
   const nav = (v: Parameters<typeof setView>[0]) => { setHover(null); setView(v); };
 
   return (
-    <div className="wb-panel wb-in flex flex-col gap-2 p-2 w-full sm:w-[150px] text-[13px]">
+    <div className="wb-panel wb-in flex flex-col gap-1.5 p-1.5 sm:gap-2 sm:p-2 w-full sm:w-[150px] text-[13px]">
       {/* Stat readouts: a row on phones, a column in the desktop side-dock. */}
       <div className="flex flex-row sm:flex-col gap-4 sm:gap-2">
         <div>
@@ -50,7 +50,7 @@ export function ChartDock() {
 
       {/* Navigate: pan a third of a screen earlier/later, or jump to the present. */}
       <div className="flex flex-col gap-1">
-        <div className="wb-label">Go</div>
+        <div className="wb-label hidden sm:block">Go</div>
         <div className="flex gap-1">
           <button
             type="button"
@@ -80,7 +80,7 @@ export function ChartDock() {
       </div>
 
       <div className="flex flex-col gap-1">
-        <div className="wb-label">Zoom</div>
+        <div className="wb-label hidden sm:block">Zoom</div>
 
         {/* Phones: one grouped row — zoom out · reset · zoom in. */}
         <div className="flex gap-1 sm:hidden">
@@ -144,7 +144,7 @@ export function ChartDock() {
       <hr className="border-t-2 border-black/40 my-0.5 w-full hidden sm:block" />
 
       <div className="flex flex-col gap-1">
-        <div className="wb-label">Birthwave</div>
+        <div className="wb-label hidden sm:block">Birthwave</div>
         {/* Buttons flow in a row on phones (like Go/Zoom) so the stacked-below
             dock stays short; they stack in the desktop side-dock column. */}
         <div className="flex flex-row sm:flex-col gap-1">

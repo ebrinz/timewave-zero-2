@@ -51,17 +51,27 @@ export function OraclePanel() {
   }, [hexVec, eventVecs, events]);
   const ws = useMemo(() => waveState(hover ? hover.t : (view.tLeft + view.tRight) / 2, view), [view, hover]);
 
+  // Compact by default so the chart keeps its room; on phones the header taps to
+  // expand into a full reading height (the chart above shrinks to suit). Desktop
+  // ignores the toggle — its height is locked by the sm: class.
+  const [expanded, setExpanded] = useState(false);
+
   // Fixed height + an internal scroll region so the panel's footprint never
   // changes with the length of the Legge stanza — the chart above stays put.
   return (
-    <div className="wb-panel wb-in w-full p-2 flex flex-col items-center gap-1 text-[13px] h-[184px] sm:h-[208px] overflow-hidden">
-      <div className="flex items-center justify-center gap-3 shrink-0">
+    <div className={`wb-panel wb-in w-full p-2 flex flex-col items-center gap-1 text-[13px] ${expanded ? 'h-[340px]' : 'h-[140px]'} sm:h-[208px] overflow-hidden`}>
+      <button
+        type="button"
+        onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
+        className="flex items-center justify-center gap-3 shrink-0 sm:pointer-events-none"
+      >
         <span className="text-4xl leading-none" aria-hidden="true">{active.glyph}</span>
         <div className="text-left">
-          <div className="wb-label">Oracle</div>
+          <div className="wb-label">Oracle <span className="sm:hidden" aria-hidden="true">{expanded ? '▲ less' : '▼ read'}</span></div>
           <div className="font-bold text-base tabular-nums">{active.kingWen} · {hex?.name ?? '…'} — line {active.line}</div>
         </div>
-      </div>
+      </button>
       <div className="flex-1 min-h-0 w-full overflow-y-auto flex flex-col items-center gap-1">
         {hex && (
           <div className="oracle-trad text-center max-w-prose leading-snug text-[14px]">
