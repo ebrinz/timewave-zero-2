@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChart } from '@/state/ChartProvider';
-import { xToT, zoomTo, panBy, type Dims, type Viewport } from '@/chart/viewport';
+import { xToT, tToX, zoomTo, panBy, type Dims, type Viewport } from '@/chart/viewport';
 import { novelty } from '@/chart/timewave';
 import { tToDate, formatInstant } from '@/chart/time';
 import { activeHexagramAt } from '@/chart/oracle/hexagram';
@@ -15,6 +15,9 @@ export function ChartCanvas() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dims, setDims] = useState<Dims>({ w: 800, h: 480 });
+  // The time the user last clicked/tapped — drawn as a persistent Amiga-blue
+  // line, anchored to that instant as the view pans/zooms.
+  const [selected, setSelected] = useState<number | null>(null);
   // Active pointers (mouse or touch), keyed by pointerId, for multi-touch.
   const pointers = useRef(new Map<number, Pt>());
   // The in-flight gesture. A one-finger 'pan' records the view + start point at
@@ -105,6 +108,15 @@ export function ChartCanvas() {
       for (const l of layers) {
         if (l.visible(view)) l.draw(ctx, view, dims, (l as { data?: unknown }).data);
       }
+      // The selected instant: a solid Amiga-blue line anchored to that time.
+      if (selected !== null) {
+        const sx = tToX(selected, view, dims.w);
+        if (sx >= 0 && sx <= dims.w) {
+          ctx.strokeStyle = '#4a9fff';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, dims.h); ctx.stroke();
+        }
+      }
       if (hover) {
         ctx.strokeStyle = 'rgba(255,136,0,0.7)';
         ctx.lineWidth = 1;
@@ -112,7 +124,7 @@ export function ChartCanvas() {
       }
     });
     return () => cancelAnimationFrame(raf);
-  }, [view, dims, layers, hover]);
+  }, [view, dims, layers, hover, selected]);
 
   // Wheel-zoom is attached as a NON-PASSIVE native listener so preventDefault()
   // actually fires — React's synthetic onWheel is passive, which lets a trackpad
@@ -193,6 +205,7 @@ export function ChartCanvas() {
     // centre (which is the selection the oracle reads).
     if (g?.kind === 'pan' && isTap(g.moved)) {
       const t = xToT(p.x, viewRef.current, dimsRef.current.w);
+      setSelected(t);          // mark the chosen instant with the blue line
       animateCenterTo(t);
     }
 
